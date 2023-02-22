@@ -1,0 +1,266 @@
+\chapter{Data-Driven Control}
+\label{chap:DataDrivenControl}
+This chapter reviews the idea of data-driven control, and lays out a specific set of algorithms which will be explored and evaluated in a simulation test.  In general, the data-driven control aims to utilize input/output data from a system, typically one or more $N$-sample length trajectories of training data by running controlled experiments, to optimize its performance.
+
+While this often implies replacing models with data, it can also mean utilizing the data to fit models which describe the system, thereby allowing traditional model-based designs.  In this regard, one can distinguish ``indirect'' approaches (in which models are learned) from ``direct'' approaches (in which controllers are learned).  This notation has been used before in the context of adaptive control (e.g., in \cite{slotineli}).  One of the goals of this thesis is to evaluate several basic indirect and direct data-driven control algorithms on a select number of case study systems.
+
+A further distinction should be made between online vs. offline approaches.  This work will focus on batched optimizations which are performed offline, assuming a particular structure (but not specific values) of the discrete-time plant to be controlled.  For each approach, the performance weighting matrices and disturbance input mapping matrix are taken to be known constants, though the state and input transition matrices are unknown.  Although linear control will be used for all baseline and data-driven control designs, the algorithms will be evaluated using a fully-coupled nonlinear simulation.
+
+\section{Traditional Subspace Identification}
+Identification of linear system is a well-understood theory.  Typically, output data $\vb*{y}_{k}$ is gathered from an impulse response from the system and used to construct a Hankel data matrix, which is factorized and used to derive parameters of an underlying state-space or hidden Markov model.  The model order is equivalent to the rank of this Hankel data matrix, and order reduction is typically done ignoring ``less dominant'' modes in the factorization.  Many such methods are based on the minimal realization theory of Ho and Kalman \cite{ho1966effective} and its extension, the Eigensystem Realization Algorithm (ERA) \cite{juang1985eigensystem}.  The Ho-Kalman method expresses the Hankel matrix using the system's hidden Markov parameters as
+\begin{equation}
+\label{eq:hankel_matrix}
+\begin{aligned}
+    \vb*{H}_{ij} = 
+    \begin{bmatrix}
+        \vb*{h}_{1} & \vb*{h}_{2} & \ldots & \vb*{h}_{j}\\
+        \vb*{h}_{2} & \ddots &  & \vdots\\
+        \vdots & & & \\
+        \vb*{h}_{i} & \ldots &  & \vb*{h}_{j+i-1}
+    \end{bmatrix}
+\end{aligned}
+\end{equation}
+where $\vb*{y}_{k+1} = \vb*{H}_{ij}\vb*{u}_{k}$ and
+\begin{equation}
+\label{eq:markov_params}
+\begin{aligned}
+    \vb*{h}_{0} = \vb*{D}\\
+    \vb*{h}_{k} = \vb*{C}\vb*{A}^{k-1}\vb*{B}
+\end{aligned}
+\end{equation}
+
+A rank-$n_{x}$ state-space approximation of the underlying system can be realized if and only if \eqref{eq:hankel_matrix} is also rank-$n_{x}$.  Similarly, ERA constructs two Hankel matrices in terms of impulse response output data as
+\begin{equation}
+\label{eq:era_hankel_matrices}
+\begin{aligned}
+    \vb*{H}_{0} = 
+    \begin{bmatrix}
+        \vb*{y}_{1} & \vb*{y}_{2} & \ldots & \vb*{y}_{j}\\
+        \vb*{y}_{2} & \ddots &  & \vdots\\
+        \vdots & & & \\
+        \vb*{y}_{i} & \ldots &  & \vb*{y}_{j+i-1}
+    \end{bmatrix}, \hspace{10pt}
+    \vb*{H}_{1} = 
+    \begin{bmatrix}
+        \vb*{y}_{2} & \vb*{y}_{3} & \ldots & \vb*{y}_{j+1}\\
+        \vb*{y}_{3} & \ddots &  & \vdots\\
+        \vdots & & & \\
+        \vb*{y}_{i+1} & \ldots &  & \vb*{y}_{j+i}
+    \end{bmatrix}
+\end{aligned}
+\end{equation}
+where $\vb*{H}_{2}$ is a time-shifted version of $\vb*{H}_{1}$.  Using singular value decomposition (SVD), these matrices identify the Hankel modes and thus the underlying state-space model.
+
+\section{Full-State Measurements}
+A benefit of methods based on Hankel matrices is their ability to handle sparse data from, e.g., SISO systems for which the state-space may not be obvious.  For (possibly multi-dimensional) systems whose states may be measured, constructing a Hankel matrix is sometimes unnecessary when a stacked matrix of input/state data is already full rank.  In this case, the data matrix may be used directly to solve for best-fit model matrices, or to solve directly for the controller.
+
+Consider $N$ samples of inputs $\vb*{u}_{k} \in \mathbb{R}^{n_{u} \times 1}$ and states $\vb*{x}_{k} \in \mathbb{R}^{n_{x} \times 1}$ for $k = 1, 2, 3, ... N$.  These may be grouped together into ``snapshot'' matrices $\vb*{U}_{0} \in \mathbb{R}^{n_{u} \times N-1}$, $\vb*{X}_{0} \in \mathbb{R}^{n_{x} \times N-1}$, and $\vb*{X}_{1} \in \mathbb{R}^{n_{x} \times N-1}$, where $\vb*{X}_{1}$ is simply a time-shifted version of $\vb*{X}_{0}$.
+\begin{equation}
+\label{eq:training_data}
+\begin{aligned}
+	%
+	\vb*{U}_{0} &= \left[
+	  \begin{array}{cccc}
+	    \vertbar & \vertbar & & \vertbar \\
+	    \vb*{u}_{1} & \vb*{u}_{2} & \ldots & \vb*{u}_{N-1}\\
+	    \vertbar & \vertbar & & \vertbar 
+	  \end{array}
+	  \right]\\
+	%
+	\vb*{X}_{0} &= \left[
+	  \begin{array}{cccc}
+	    \vertbar & \vertbar & & \vertbar \\
+	    \vb*{x}_{1} & \vb*{x}_{2} & \ldots & \vb*{x}_{N-1}\\
+	    \vertbar & \vertbar & & \vertbar 
+	  \end{array}
+	  \right]\\
+	%
+	\vb*{X}_{1} &= \left[
+	  \begin{array}{cccc}
+	    \vertbar & \vertbar & & \vertbar \\
+	    \vb*{x}_{2} & \vb*{x}_{3} & \ldots & \vb*{x}_{N}\\
+	    \vertbar & \vertbar & & \vertbar 
+	  \end{array}
+	  \right]
+\end{aligned}
+\end{equation}
+
+In this work however, the assumption will be that the number of states is known, all states are measured, and enough persistently excited training data are gathered such that the matrices in \eqref{eq:training_data} are full-rank.  This is reasonable given the assumption that the training data are gathered offline over an appropriately long duration.
+
+\section{Willems' Fundamental Theorem}
+A prerequisite to learning, data-driven or adaptive control is the concept of persistence of excitation.  The system inputs used to generate training data, online or offline, need to induce enough variation to properly characterize the state-space in order to subsequently optimize a control policy.  In \cite{willems2005note}, a theorem was provided which quantifies the concept of persistent excitation for linear systems using the rank of the training data matrices in which are constructed like in Equation \eqref{eq:training_data}.  If $\vb*{u}$ is persistently exciting of order $n_{x}$, then
+\begin{equation}
+\label{eq:willems_1}
+	\text{rank}\left[ \vb*{X}_{0} \right] = \text{rank}\left[ \vb*{X}_{1} \right] =  n_{x}
+\end{equation}
+and if $\vb*{u}$ is persistently exciting of order $n_{x} + 1$, then
+\begin{equation}
+\label{eq:willems_2}
+	\text{rank} \begin{bmatrix} \vb*{X}_{0}\\ \vb*{U}_{0} \end{bmatrix}
+		= \text{rank} \begin{bmatrix} \vb*{X}_{1}\\ \vb*{U}_{1} \end{bmatrix} = n_{x} + n_{u}
+\end{equation}
+which imply that a single finite trajectory's worth of training data can be used either for linear system identification or for data-driven control.  This theorem is exploited by many data-driven control methods.
+
+\section{Dynamic Mode Decomposition}
+Dynamic mode decomposition (DMD) is a model reduction technique that computes a best-fit discrete model using data gathered from an autonomous dynamical system, using its dominant singular values \cite{schmid2010dynamic, schmid2011applications}.  The DMD with control (DMDc) extends this to non-autonomous systems and is conceptually very similar to traditional subspace techniques \cite{proctor2016dmdc, shin2020unifying}.  Persistently exciting training data constructed like in Equation \eqref{eq:training_data} fulfills the approximate relationship
+\begin{equation}
+\label{eq:dmdc_linear_model}
+\begin{aligned}
+	\vb*{X}_{1} &\approx \begin{bmatrix} \vb*{A} & \vb*{B} \end{bmatrix} \begin{bmatrix} \vb*{X}_{0} \\ \vb*{U}_{0} \end{bmatrix}
+\end{aligned}
+\end{equation}
+and an SVD can be used to approximate the matrix
+\begin{equation}
+\label{eq:dmdc_svd}
+\begin{aligned}
+	\begin{bmatrix} \vb*{X}_{0} \\ \vb*{U}_{0} \end{bmatrix} &\approx \vb*{U}\vb*{\Sigma}\vb*{V}^{T}
+\end{aligned}
+\end{equation}
+
+Similar to ERA, the model order is determined by the number of singular values included from Equation \eqref{eq:dmdc_svd}.  In this work, the state dimension $n_{x}$ and input dimension $n_{u}$ are known, and $\vb*{U} \in \mathbb{R}^{(n_{x}+n_{u}) \times (n_{x}+n_{u})}$, $\vb*{\Sigma} \in \mathbb{S}^{(n_{x}+n_{u})}$, and $\vb*{V} \in \mathbb{R}^{N-1 \times (n_{x}+n_{u})}$ and the SVD is not truncated.  From Equation \eqref{eq:dmdc_linear_model} and Equation \eqref{eq:dmdc_svd}, the solution is
+\begin{equation}
+\label{eq:dmdc_solution}
+\begin{aligned}
+	\begin{bmatrix} \hat{\vb*{A}} & \hat{\vb*{B}} \end{bmatrix} &= \vb*{X}_{1} \begin{bmatrix} \vb*{X}_{0} \\ \vb*{U}_{0} \end{bmatrix}^{\dagger}
+	= \vb*{X}_{1} \vb*{V}\vb*{\Sigma}^{-1}\vb*{U}^{T}
+\end{aligned}
+\end{equation}
+where $\dagger$ is the Moore-Penrose psuedoinverse.
+
+\subsection{Equivalent Total Least Squares Problem}
+The problem can also be solved by directly transcribing an unconstrained convex optimization, specifically a total least squares problem in terms of a Frobenius norm, denoted $||.||_{F}$, which for a vector/matrix is known to be equivalent to the $\ell^{2}$ norm of its singular values.
+\begin{equation}
+\label{eq:dmdc_cost_function}
+\begin{aligned}
+	\vb*{\begin{bmatrix} \hat{\vb*{A}} & \hat{\vb*{B}} \end{bmatrix}} &=
+		\min_{\footnotesize \begin{bmatrix} \vb*{A} & \vb*{B} \end{bmatrix}} \hspace{5pt} 
+		\bigg{|}\bigg{|} \vb*{X}_{1} - \begin{bmatrix} \vb*{A} & \vb*{B} \end{bmatrix}
+		\begin{bmatrix} \vb*{X}_{0} \\ \vb*{U}_{0} \end{bmatrix} \bigg{|}\bigg{|}_{F}
+\end{aligned}
+\end{equation}
+
+\section{Data-Driven Linear Matrix Inequalities}
+Recent work on data-driven LMIs has extended Willems' Fundamental Theorem and DMDc to parameterize a closed-loop linear system in terms of persistently exciting training data of the form given by Equation \eqref{eq:training_data} and other matrices which are decision variables in a constrained optimization problem.  According to Theorem 2 of \cite{de2019formulas}, for persistently exciting input and output training data constructed like in Equation \eqref{eq:training_data}, there exists a matrix $\vb*{G}_{K} \in \mathbb{R}^{N \times n_{x}}$ which satisfies
+\begin{equation}
+\begin{aligned}
+	\begin{bmatrix} \vb*{I}\\ \vb*{K}_{b} \end{bmatrix} = \begin{bmatrix} \vb*{X}_{0}\\ \vb*{U}_{0} \end{bmatrix} \vb*{G}_{K}
+\end{aligned} \label{data_driven_parameterization2}
+\end{equation}
+allowing data-driven equality constraints to be written for the feedback gains $\vb*{K}_{b}$, closed-loop system matrix $(\vb*{A} - \vb*{B}\vb*{K}_{b})$, and decision variable $\vb*{G}_{K}$.  These are:
+\begin{subequations}
+\label{eq:data_driven_constraints}
+\begin{align}
+	\vb*{K}_{b} &= -\vb*{U}_{0}\vb*{G}_{K} \label{eq:dd_constraint1}\\
+	(\vb*{A} - \vb*{B}\vb*{K}_{b}) &= \vb*{X}_{1}\vb*{G}_{K} \label{eq:dd_constraint2}\\
+	\vb*{I} &= \vb*{X}_{0}\vb*{G}_{K} \label{eq:dd_constraint3}
+\end{align}
+\end{subequations}
+
+In \cite{de2019formulas}, these results are used to derive two examples of ``direct'' data-driven control, in which static state feedback gains are synthesized without computing an explicit state-space model.  The examples include Lyapunov stable feedback and LQR/$\mathcal{H}_{2}$ feedback.
+
+\subsection{Lyapunov Stable Control}
+\label{sect:dataDrivenLyapunov}
+Using Equation \eqref{eq:dd_constraint2}, the Lyapunov inequality given by Equation \eqref{eq-lyapunov2} can be written in terms of training data as
+\begin{equation}
+\label{eq:lyapunov2_dd}
+\begin{aligned}
+	(\vb*{X}_{1}\vb*{G}_{K}) \vb*{P} (\vb*{X}_{1}\vb*{G}_{K})^{T} - \vb*{P} < \vb*{0}
+\end{aligned}
+\end{equation}
+
+Introducing a change of variables $\vb*{Q} := \vb*{G}_{K}\vb*{P}$ and $\vb*{P} := \vb*{X}_{0}\vb*{Q}$, for decision variable $\vb*{Q} \in \mathbb{R}^{N \times n_{x}}$ and some algebraic manipulation, Equation \eqref{eq:lyapunov2_dd} becomes
+\begin{equation}
+\label{eq:lyapunov3_dd}
+\begin{aligned}
+	\vb*{X}_{1}\vb*{Q} \vb*{P}^{-1} \vb*{Q}^{T}\vb*{X}_{1}^{T} - \vb*{P} < \vb*{0}
+\end{aligned}
+\end{equation}
+and using a Schur complement can be written as an LMI.  Given training data, the data-driven optimization problem is finding a $\vb*{Q}$ which satisfies
+\begin{equation}
+\label{eq:lyapunov_lmi}
+\begin{aligned}
+	\begin{cases}
+		\vb*{P} = \vb*{X}_{0}\vb*{Q}\\ \vspace{-15pt}\\
+		\begin{bmatrix}
+			\vb*{P} & \vb*{X}_{1} \vb*{Q}\\
+			\vb*{Q}^{T}\vb*{X}_{1}^{T} & \vb*{P}\\
+		\end{bmatrix} > \vb*{0}
+	\end{cases}
+\end{aligned}
+\end{equation}
+which provide Lyapunov-stable feedback gains $\vb*{K}_{b} = -\vb*{U}_{0}\vb*{Q}\vb*{P}^{-1}$ via Equation \eqref{eq:dd_constraint1}.
+
+\subsection{$\mathcal{H}_{2}$ Optimal Control}
+The data-driven LQR/$\mathcal{H}_{2}$ solution involves two parts: the closed-loop Lyapunov inequality (the second constraint of Equation \eqref{eq-h2-sdp}) and the LQR/$\mathcal{H}_{2}$ cost function given by Equation \eqref{J_K_h2_cost_TrQR}.  Using Equation \eqref{eq:dd_constraint2} and variable change $\vb*{Q} := \vb*{G}_{K}\vb*{P}$, $\vb*{Q} \in \mathbb{R}^{N \times n_{x}}$ and $\vb*{P} := \vb*{X}_{0}\vb*{Q}$ the Lyapunov inequality can be written in terms of training data as
+\begin{equation}
+\label{eq:h2_lyap_dd}
+\begin{aligned}
+	\vb*{X}_{1}\vb*{Q} \vb*{P}^{-1} \vb*{Q}^{T}\vb*{X}_{1}^{T} - (\vb*{P} - \vb*{D}\vb*{D}^{T}) < \vb*{0}
+\end{aligned}
+\end{equation}
+and using Equation \eqref{eq:dd_constraint1} the second term in Equation \eqref{J_K_h2_cost_TrQR} can be re-written as
+\begin{equation}
+\label{eq:h2_cost_dd}
+\begin{aligned}
+	\vb*{R}_{u}^{1/2}\vb*{K}_{b}\vb*{P}\vb*{K}_{b}^{T}\vb*{R}_{u}^{1/2} &=
+		\vb*{R}_{u}^{1/2}(\vb*{U}_{0}\vb*{Q}\vb*{P}^{-1})\vb*{P}(\vb*{U}_{0}\vb*{Q}\vb*{P}^{-1})^{T}\vb*{R}_{u}^{1/2}\\
+	&= \vb*{R}_{u}^{1/2}\vb*{U}_{0}\vb*{Q}\vb*{P}^{-T}\vb*{Q}^{T}\vb*{U}_{0}^{T}\vb*{R}_{u}^{1/2}\\
+	&= \vb*{R}_{u}^{1/2}\vb*{U}_{0}\vb*{Q}\vb*{P}^{-1}\vb*{Q}^{T}\vb*{U}_{0}^{T}\vb*{R}_{u}^{1/2}
+\end{aligned}
+\end{equation}
+and made into an inequality constraint using slack variable $\vb*{X} \in \mathbb{S}^{n_{u}}$, i.e.,
+\begin{equation}
+\label{eq-h2-sdp2}
+\begin{aligned}
+	\underset{\vb*{P}, \vb*{K}_{b}}{\min} \quad & \text{Tr}(\vb*{Q}_{x}\vb*{P}) + \text{Tr}(\vb*{X})\\
+	\textrm{s.t.} \quad & \begin{cases}
+		\vb*{P} \geq \vb*{D}\vb*{D}^{T}\\
+		\vb*{P} = \vb*{X}_{0}\vb*{Q}\\
+		\vb*{X}_{1}\vb*{Q} \vb*{P}^{-1} \vb*{Q}^{T}\vb*{X}_{1}^{T} - (\vb*{P} - \vb*{D}\vb*{D}^{T}) < \vb*{0}\\
+		\vb*{X} - \vb*{R}_{u}^{1/2}\vb*{U}_{0}\vb*{Q}\vb*{P}^{-1}\vb*{Q}^{T}\vb*{U}_{0}^{T}\vb*{R}_{u}^{1/2} > \vb*{0}
+	\end{cases}
+\end{aligned}
+\end{equation}
+
+Using Schur complements, the constraints of Equation \eqref{eq-h2-sdp2} can be written as LMIs, and the data-driven optimization problem becomes finding $\vb*{Q}$ and $\vb*{X}$ which satisfy
+\begin{equation}
+\label{eq:h2_lmi_dd}
+\begin{aligned}
+	\underset{\vb*{P}, \vb*{K}_{b}}{\min} \quad & \text{Tr}(\vb*{Q}_{x}\vb*{P}) + \text{Tr}(\vb*{X})\\
+	\textrm{s.t.} \quad & \begin{cases}
+		\vb*{P} = \vb*{X}_{0}\vb*{Q}\\ \vspace{-15pt}\\
+		\begin{bmatrix}
+			\vb*{X} & \vb*{R}_{u}^{\frac{1}{2}}\vb*{U}_{0}\vb*{Q}\\
+			\vb*{Q}^{T}\vb*{U}_{0}^{T}\vb*{R}_{u}^{\frac{1}{2}} & \vb*{P}\\
+		\end{bmatrix} > \vb*{0}\\ \vspace{-10pt}\\
+		\begin{bmatrix}
+			\vb*{P} - \vb*{D}\vb*{D}^{T} & \vb*{X}_{1}\vb*{Q}\\
+			\vb*{Q}^{T}\vb*{X}_{1}^{T} & \vb*{P}\\
+		\end{bmatrix} > \vb*{0}
+	\end{cases}
+\end{aligned}
+\end{equation}
+which provide LQR/$\mathcal{H}_{2}$ feedback gains $\vb*{K}_{b} = -\vb*{U}_{0}\vb*{Q}\vb*{P}^{-1}$ via Equation \eqref{eq:dd_constraint1}.
+
+\subsection{$\mathcal{H}_{2}$ Suboptimal Control}
+\label{sect:dataDrivenH2Suboptimal}
+A slight variant on the data-driven $\mathcal{H}_{2}$ optimal control strategy allows some slack $\varepsilon_{J}$ in the cost function; this provides some robustness to noise or other uncertainty while maintaining a Lyapunov stability constraint.  For a large enough $\varepsilon_{J}$, the optimization is similar to the data-driven Lyapunov technique described in Section \ref{sect:dataDrivenLyapunov} (stable but not cost-optimal).  Roughly speaking, the $\mathcal{H}_{2}$ suboptimal approach described here is heuristic/engineering solution which achieves acceptable results which, in terms of optimality.  It lies somewhere between Lyapunov-only stability and $\mathcal{H}_{2}$-optimal control.  Its LMI is
+\begin{equation}
+\label{eq:h2s_lmi_dd}
+\begin{aligned}
+	\underset{\vb*{P}, \vb*{K}_{b}}{\min} \quad & \text{Tr}(\vb*{Q}_{x}\vb*{P}) + \text{Tr}(\vb*{X}) - \varepsilon_{J}\\
+	\textrm{s.t.} \quad & \begin{cases}
+		\varepsilon_{J} > 0\\ \vspace{-15pt}\\
+		\vb*{P} = \vb*{X}_{0}\vb*{Q}\\ \vspace{-15pt}\\
+		\begin{bmatrix}
+			\vb*{X} & \vb*{R}_{u}^{\frac{1}{2}}\vb*{U}_{0}\vb*{Q}\\
+			\vb*{Q}^{T}\vb*{U}_{0}^{T}\vb*{R}_{u}^{\frac{1}{2}} & \vb*{P}\\
+		\end{bmatrix} > \vb*{0}\\ \vspace{-10pt}\\
+		\begin{bmatrix}
+			\vb*{P} - \vb*{D}\vb*{D}^{T} & \vb*{X}_{1}\vb*{Q}\\
+			\vb*{Q}^{T}\vb*{X}_{1}^{T} & \vb*{P}\\
+		\end{bmatrix} > \vb*{0}
+	\end{cases}
+\end{aligned}
+\end{equation}
+which provide $\mathcal{H}_{2}$ suboptimal feedback gains $\vb*{K}_{b} = -\vb*{U}_{0}\vb*{Q}\vb*{P}^{-1}$ via Equation \eqref{eq:dd_constraint1}.

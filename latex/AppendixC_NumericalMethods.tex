@@ -1,0 +1,149 @@
+\chapter{Solving Discrete Algebraic Riccati Equations}
+\label{appendix:numericalMethods}
+The following derivations are based primarily on Chapter 3, Section 7 (\emph{Discrete Neighboring-Optimal Control}) and Chapter 5, Section 7 (\emph{Solution of the Algebraic Riccati Equation}) of Stengel \cite{stengel}, along with papers by Vaughan \cite{vaughan1970nonrecursive} and Laub \cite{laub1979schur}, extended to the discrete generalized AREs associated with two-player zero-sum dynamic games.  The infinite-horizon version is given by Equation \eqref{eq-hinf-dgare}.  A number of related papers include \cite{pappas1980numerical, gardiner1986generalization, aliev1992discrete, gudmundsson1992scaling, chen1994non, takaba1996discrete, feng2009solving, rojas2011discrete}.  Note that if disturbance attenuation gain $\gamma = \infty$, the solution $\mathbf{P}_{\gamma} = \mathbf{P}$ solves \eqref{eq-lqr-dare} the LQR problem's discrete ARE.  Consider the Hamiltonian
+\begin{equation}
+\begin{aligned}
+	\vb*{H}_{k} &= \frac{1}{2} \big{(} \vb*{x}_{k}^{T}\vb*{Q}_{x}\vb*{x}_{k}
+			+ \vb*{u}_{k}^{T}\vb*{R}_{u}\vb*{u}_{k}
+			- \gamma^{2} \vb*{w}_{k}^{T}\vb*{w}_{k} \big{)} + 
+			\vb*{\lambda}_{k+1}^{T} \big{(} \vb*{A}\vb*{x}_{k}
+			+ \vb*{B}\vb*{u}_{k} + \vb*{D}\vb*{w}_{k} \big{)}
+\end{aligned} \label{hamiltonian}
+\end{equation}
+and necessary conditions for optimality
+\begin{subequations}
+\begin{align}
+	%
+	\vb*{x}_{k+1} &= \nabla_{\vb*{\lambda}_{k+1}} \vb*{H}_{k}
+		= \vb*{A}\vb*{x}_{k} + \vb*{B}\vb*{u}_{k} + \vb*{D}\vb*{w}_{k}\\
+	%
+	\vb*{\lambda}_{k} &= (\nabla_{\vb*{x}_{k}} \vb*{H}_{k})^{T}
+		= \vb*{Q}_{x}\vb*{x}_{k} +  \vb*{A}^{T}\vb*{\lambda}_{k+1}
+		= \vb*{P}_{\gamma,k} \vb*{x}_{k}\\
+	%
+	\vb*{0} &= \nabla_{\vb*{u}_{k}} \vb*{H}_{k}
+		= \vb*{R}_{u}\vb*{u}_{k} +  \vb*{B}^{T}\vb*{\lambda}_{k+1}\\
+	%
+	\vb*{0} &= \nabla_{\vb*{w}_{k}} \vb*{H}_{k}
+		= - \gamma^{2} \vb*{w}_{k} +  \vb*{D}^{T}\vb*{\lambda}_{k+1}
+	%
+\end{align} \label{conditions_for_optimality}
+\end{subequations}
+
+The optimal control is $\vb*{u}_{k} = -\vb*{R}_{u}^{-1} \vb*{B}^{T} \vb*{\lambda}_{k+1}$ and the worst-case disturbance is $\vb*{w}_{k} = \gamma^{-2} \vb*{D}^{T} \vb*{\lambda}_{k+1}$.  Rearranging the state equation for $\vb*{x}_{k}$ and plugging in the expressions for $\vb*{u}_{k}$ and $\vb*{w}_{k}$ yields
+\begin{equation}
+\begin{aligned}
+	\vb*{A}\vb*{x}_{k} &= \vb*{x}_{k+1} - \vb*{B}\vb*{u}_{k} - \vb*{D}\vb*{w}_{k}\\
+	\vb*{x}_{k} &= \vb*{A}^{-1}\vb*{x}_{k+1} - \vb*{A}^{-1}\vb*{B}\vb*{u}_{k}
+		- \vb*{A}^{-1}\vb*{D}\vb*{w}_{k}\\
+	%
+	&= \vb*{A}^{-1}\vb*{x}_{k+1} - \vb*{A}^{-1} \vb*{B} \big{(}-\vb*{R}_{u}^{-1}
+		\vb*{B}^{T} \vb*{\lambda}_{k+1} \big{)} - \vb*{A}^{-1}\vb*{D} \big{(}
+			\gamma^{-2} \vb*{D}^{T} \vb*{\lambda}_{k+1} \big{)}\\
+	%
+	&= \vb*{A}^{-1}\vb*{x}_{k+1} + \vb*{A}^{-1} \big{(} \vb*{B} \vb*{R}_{u}^{-1} \vb*{B}^{T}
+		- \gamma^{-2} \vb*{D}\vb*{D}^{T} \big{)} \vb*{\lambda}_{k+1}
+\end{aligned}
+\end{equation}
+and plugging the resulting expression for $\vb*{x}_{k}$ into the costate equation yields
+\begin{equation}
+\begin{aligned}
+	\vb*{\lambda}_{k} &= \vb*{Q}_{x}\vb*{x}_{k} + \vb*{A}^{T}\vb*{\lambda}_{k+1}\\
+	%
+	&= \vb*{Q} \big{(} \vb*{A}^{-1}\vb*{x}_{k+1} + \vb*{A}^{-1} \big{(}
+			\vb*{B} \vb*{R}_{u}^{-1} \vb*{B}^{T} - \gamma^{-2} \vb*{D}\vb*{D}^{T}
+			\big{)} \vb*{\lambda}_{k+1} \big{)} + \vb*{A}^{T}\vb*{\lambda}_{k+1}\\
+	%
+	&= \vb*{Q} \vb*{A}^{-1}\vb*{x}_{k+1} + \big{(} \vb*{A}^{T} +\vb*{Q}_{x}\vb*{A}^{-1}
+			\big{(} \vb*{B} \vb*{R}_{u}^{-1} \vb*{B}^{T} - \gamma^{-2} \vb*{D}\vb*{D}^{T} \big{)}
+			\big{)} \vb*{\lambda}_{k+1}\\
+\end{aligned}
+\end{equation}
+Together, these yield a system of equations for $\vb*{x}_{k}$ and $\vb*{\lambda}_{k}$:
+\begin{equation}
+\begin{aligned}
+	\begin{bmatrix}
+		\vb*{x}_{k}\\ 
+		\vb*{\lambda}_{k}
+	\end{bmatrix} = \underbrace{
+	\begin{bmatrix}
+		\vb*{A}^{-1} & \vb*{A}^{-1} \big{(} \vb*{B} \vb*{R}_{u}^{-1} \vb*{B}^{T}
+			- \gamma^{-2} \vb*{D}\vb*{D}^{T} \big{)} \\
+		\vb*{Q} \vb*{A}^{-1} & \vb*{A}^{T} +\vb*{Q}_{x}\vb*{A}^{-1}
+			\big{(} \vb*{B} \vb*{R}_{u}^{-1} \vb*{B}^{T}
+			- \gamma^{-2} \vb*{D}\vb*{D}^{T} \big{)}\\
+	\end{bmatrix} }_{\text{\normalsize {$\vb*{\Psi}$}}}
+	\begin{bmatrix}
+		\vb*{x}_{k+1}\\ 
+		\vb*{\lambda}_{k+1}
+	\end{bmatrix} =
+	\begin{bmatrix}
+		\Psi_{11} & \Psi_{12}\\
+		\Psi_{21} & \Psi_{22}\\
+	\end{bmatrix}
+	\begin{bmatrix}
+		\vb*{x}_{k+1}\\ 
+		\vb*{\lambda}_{k+1}
+	\end{bmatrix}
+\end{aligned}
+\end{equation}
+where $\vb*{\Psi}$ is the symplectic matrix.  Solving this system for $\vb*{P}_{\gamma,k}$ can be done several ways.
+
+\section{Eigenvector Method}
+\label{appendix:numerical:eigenvector}
+The Eigenvector Method (a.k.a. Vaughan's method) is provided in \cite{vaughan1970nonrecursive} and is the discrete-time equivalent to the Negative Exponential Method for solving continuous-time AREs \cite{vaughan1969negative}.  Here, an eigendecomposition of $\vb*{\Psi}$ is computed, i.e.,
+\begin{equation}
+\begin{aligned}
+	\vb*{\Psi} &=
+	\begin{bmatrix}
+		E_{11} & E_{12}\\
+		E_{21} & E_{22}\\
+	\end{bmatrix}
+	\begin{bmatrix}
+		\Lambda & 0\\
+		0 & \Lambda^{-1}\\
+	\end{bmatrix}
+	\begin{bmatrix}
+		E_{11} & E_{12}\\
+		E_{21} & E_{22}\\
+	\end{bmatrix}^{-1}
+\end{aligned}
+\end{equation}
+which allows the non-iterative computation of $\vb*{P}_{\gamma} = E_{21}E_{11}^{-1}$.
+
+\section{Schur Method}
+\label{appendix:numerical:schur}
+The Schur Method (a.k.a. Laub's method) provided in \cite{laub1979schur} is a variant of the classical Eigenvector Method.  Instead of computing generalized eigenvectors of $\vb*{\Psi}$, it computes an appropriate set of Schur vectors, i.e.,
+\begin{equation}
+\begin{aligned}
+	\begin{bmatrix}
+		U_{11} & U_{12}\\
+		U_{21} & U_{22}\\
+	\end{bmatrix}^{T}
+	\begin{bmatrix}
+		\Psi_{11} & \Psi_{12}\\
+		\Psi_{21} & \Psi_{22}\\
+	\end{bmatrix}
+	\begin{bmatrix}
+		U_{11} & U_{12}\\
+		U_{21} & U_{22}\\
+	\end{bmatrix} &=
+	\begin{bmatrix}
+		\Lambda_{11} & \Lambda_{12}\\
+		0 & \Lambda_{22}\\
+	\end{bmatrix}
+\end{aligned}
+\end{equation}
+which allows the non-iterative computation of $\vb*{P}_{\gamma} = U_{21}U_{11}^{-1}$.  Due to its underlying use of the QR decomposition, the Schur Method is considered numerically preferable to the Eigenvector Method in terms of speed and sensitivity to multiple eigenvalues.
+
+\section{Iterative Method}
+\label{appendix:numerical:iterative}
+This method implements a policy iteration algorithm, incrementally calculating $\vb*{P}_{\gamma,k}$ as
+\begin{equation}
+\label{eq:dgare_iterative_method}
+\begin{aligned}
+	\vb*{P}_{\gamma,k} &= \big{(} \Psi_{21} + \Psi_{22}\vb*{P}_{\gamma,k+1} \big{)}
+		\big{(} \Psi_{11} + \Psi_{12}\vb*{P}_{\gamma,k+1} \big{)}^{-1}\\
+\end{aligned}
+\end{equation}
+for $k = N, N-1, ... 1$.  Over an infinite horizon, $N \rightarrow \infty$ and  $\vb*{P}_{\gamma,k} \rightarrow \vb*{P}_{\gamma}$, and \eqref{eq:dgare_iterative_method} is no different from the DGARE provided by \eqref{eq-hinf-dgare}.  To solve it using policy iteration, the difference equation is initialized with $\vb*{P}_{\gamma,k} = \vb*{Q}_{x}$ at $k = N$ and iterated backward (verifying also the spectral radius condition \eqref{eq-hinf-existence} at each iteration) until the value of $\vb*{P}_{\gamma,k}$ converges.

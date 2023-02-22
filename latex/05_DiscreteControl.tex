@@ -1,0 +1,411 @@
+\chapter{Discrete-Time State-Space Control}
+\label{chap:DiscreteControl}
+This chapter reviews the infinite-horizon, discrete-time versions of linear optimal control problems addressed in this thesis (LQR, $\mathcal{H}_{2}$ and $\mathcal{H}_{\infty}$) using a common state-space framework based on algebraic Riccati equations.  Full details of game-theoretic robust control for discrete-time systems can be found in the standard text by Basar \cite{bacsar2008h}.  The specific algorithms below are chosen due to their direct mapping into certain data-driven control approaches which allow equivalent cost functions to be specified for optimization-based learning.
+
+\section{Generalized Plant Notation}
+The so-called ``generalized plant'' compactly represents the effect of exogenous inputs (e.g. reference or disturbance inputs, measurement noise, plant uncertainty) on a nominal system.  A plant's state-space realization is augmented with virtual performance output $\vb*{z}$ (to be kept small) and all disturbances are grouped into a second input $\vb*{w}$.  The associated equations are
+\begin{subequations}
+\label{eq:state_space_equations_T0}
+\begin{align}
+	\vb*{x}_{k+1} &= \vb*{A}\vb*{x}_{k} + \vb*{B}_{1}\vb*{w}_{k} + \vb*{B}_{2}\vb*{u}_{k}\\
+	\vb*{z}_{k} &= \vb*{C}_{1}\vb*{x}_{k} + \vb*{D}_{11}\vb*{w}_{k} + \vb*{D}_{12}\vb*{u}_{k}\\
+	\vb*{y}_{k} &= \vb*{C}_{2}\vb*{x}_{k} + \vb*{D}_{21}\vb*{w}_{k} + \vb*{D}_{21}\vb*{u}_{k}
+\end{align}
+\end{subequations}
+where $\vb*{x} \in \mathbb{R}^{n_{x}}$ is the state, $\vb*{u} \in \mathbb{R}^{n_{u}}$ is the input, $\vb*{w} \in \mathbb{R}^{n_{w}}$ is the disturbance, $\vb*{z} \in \mathbb{R}^{n_{z}}$ is the performance output, and $\vb*{y} \in \mathbb{R}^{n_{y}}$ is the measurement.
+
+\section{Linear Fractional Transformations}
+Robust control often uses the partitioned linear fractional transformation (LFT) notation from \cite{doyle1991review} to write the generalized plant, shown in Figure \ref{fig:open_loop_plant}, as the transfer function matrix
+
+\begin{equation}
+\begin{aligned}
+	\vb*{T} &:=
+	\begin{bmatrix}
+	\begin{array}{c|cc}
+		\vb*{A} & \vb*{B}_{1} & \vb*{B}_{2}\\
+		\hline
+		\vb*{C}_{1} & \vb*{D}_{11} & \vb*{D}_{12}\\
+		\vb*{C}_{2} & \vb*{D}_{21} & \vb*{D}_{22}\\
+	\end{array}
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+	\begin{array}{c|cc}
+		\vb*{T}_{11} & \vb*{T}_{12}\\
+		\hline
+		\vb*{T}_{21} & \vb*{T}_{22}\\
+	\end{array}
+	\end{bmatrix}
+\end{aligned}
+\end{equation}\\
+where $\vb*{T}_{ij} \triangleq \vb*{C}_{i}(z\vb*{I} - \vb*{A})^{-1}\vb*{B}_{j} + \vb*{D}_{ij}$.  Common permutations are illustrated in Figure \ref{fig:robust_plant_diagrams}.  In Figure \ref{fig:lower_lfr_plant}, a feedback policy $\vb*{K}: \vb*{y} \rightarrow \vb*{u}$ has been applied to $\vb*{T}$.  In Figure \ref{fig:upper_lfr_plant}, the disturbance channel $\vb*{z} \rightarrow \vb*{w}$ is a stable, bounded transfer function $\vb*{\Delta}$, to be used for classical small-gain analyses.  In closed-loop system Figure \ref{fig:closed_loop_plant}, both $\vb*{\Delta}$ and $\vb*{K}$ have been applied.
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.45\textwidth}
+    \centering
+    \hspace{-10pt}
+    \resizebox{0.8\textwidth}{!}{
+	% Open-loop generalized plant (black-box)
+	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+		% Coordinates
+		\coordinate (orig) at (0,0);
+		\coordinate (LLP) at (7,4);
+	
+		% Generalized plant
+		\node[draw, fill=white, minimum width=2cm, minimum height=2cm,
+			anchor=south west, text width=2cm, align=center] (P) at (LLP) {$\vb*{T}$};
+	
+		% Input-to-state (LLFT) path
+		\draw[->] ($(P.0) - (3.8,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{u}$} ($(P.0) - (2.25,0.5)$);
+		\draw[->] ($(P.0) + (0,-0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{y}$} ($(P.0) + (1.7,-0.5)$);
+	
+		% Disturbance-to-performance (ULFT) path
+		\draw[->] ($(P.0) - (3.8,-0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{w}$} ($(P.0) - (2.25,-0.5)$);
+		\draw[->] ($(P.0) + (0,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{z}$}  ($(P.0) + (1.7,0.5)$);
+	\end{tikzpicture}
+    }
+    \vspace{30pt}
+    \caption{\small Open-loop generalized plant.}
+    \label{fig:open_loop_plant}
+\end{subfigure}
+%
+\begin{subfigure}{0.45\textwidth}
+    \centering
+    \resizebox{0.8\textwidth}{!}{
+	% Open-loop disturbance plant
+	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+		% Coordinates
+		\coordinate (orig) at (0,0);
+		\coordinate (LLP) at (7,4);
+		\coordinate (LLK) at (7.5,2.4);
+
+		% Generalized plant
+		\node[draw, fill=white, minimum width=2cm, minimum height=2cm,
+			anchor=south west, text width=2cm, align=center] (P) at (LLP) {$\vb*{T}$};
+
+		% Feedback control policy
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm,
+			anchor=south west, text width=1cm, align=center] (K) at (LLK) {$\vb*{K}$};
+
+		% Input-to-state (LLFT) path
+		\draw[-] ($(P.0) + (0,-0.5)$) -- ($(P.0) + (0.7,-0.5)$);
+		\draw[->] ($(P.0) + (0.7,-0.5)$) |- node[right, pos=0.25]{\footnotesize $\vb*{y}$} (K);
+		\draw[-] (K) -| node[left, pos=0.75]{\footnotesize $\vb*{u}$} ($(P.0) - (2.85,0.5)$);
+		\draw[->] ($(P.0) - (2.85,0.5)$) -- ($(P.0) - (2.25,0.5)$);
+
+		% Disturbance-to-performance (ULFT) path
+		\draw[->] ($(P.0) - (3.8,-0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{w}$} ($(P.0) - (2.25,-0.5)$);
+		\draw[->] ($(P.0) + (0,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{z}$}  ($(P.0) + (1.7,0.5)$);
+	\end{tikzpicture}
+    }
+    %\vspace{5pt}
+    \caption{\small Lower linear fractional representation.}
+    \label{fig:lower_lfr_plant}
+\end{subfigure}
+%
+\begin{subfigure}{0.45\textwidth}
+    \centering
+    \vspace{18pt}
+    \resizebox{0.8\textwidth}{!}{
+	% Closed-loop disturbance plant
+	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+		% Coordinates
+		\coordinate (orig) at (0,0);
+		\coordinate (LLP) at (7,4);
+		\coordinate (LLDelta) at (7.5,6.5);
+
+		% Generalized plant
+		\node[draw, fill=white, minimum width=2cm, minimum height=2cm,
+			anchor=south west, text width=2cm, align=center] (P) at (LLP) {$\vb*{T}$};
+
+		% Bounded disturbance map
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm,
+			anchor=south west, text width=1cm, align=center] (D) at (LLDelta) {$\vb*{\Delta}$};
+
+		% Input-to-state (LLFT) path
+		\draw[->] ($(P.0) - (3.8,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{u}$} ($(P.0) - (2.25,0.5)$);
+		\draw[->] ($(P.0) + (0,-0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{y}$} ($(P.0) + (1.7,-0.5)$);
+
+		% Disturbance-to-performance (ULFT) path
+		\draw[-] ($(P.0) + (0,0.5)$) -- ($(P.0) + (0.7,0.5)$);
+		\draw[->] ($(P.0) + (0.7,0.5)$) |- node[right, pos=0.25]{\footnotesize $\vb*{z}$} (D);
+		\draw[-] (D) -| node[left, pos=0.75]{\footnotesize $\vb*{w}$} ($(P.0) - (2.85,-0.5)$);
+		\draw[->] ($(P.0) - (2.85,-0.5)$) -- ($(P.0) - (2.25,-0.5)$);
+	\end{tikzpicture}
+	\hspace{-10pt}
+    }
+    %\vspace{5pt}
+    \caption{\small Upper linear fractional representation.}
+    \label{fig:upper_lfr_plant}
+\end{subfigure}
+%
+\begin{subfigure}{0.4\textwidth}
+    \centering
+    %\vspace{25pt}
+    \resizebox{0.8\textwidth}{!}{
+	% Closed-loop generalized plant with uncertainty
+	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+		% Coordinates
+		\coordinate (orig) at (0,0);
+		\coordinate (LLP) at (7,4);
+		\coordinate (LLK) at (7.5,2.4);
+		\coordinate (LLDelta) at (7.5,6.5);
+
+		% Generalized plant
+		\node[draw, fill=white, minimum width=2cm, minimum height=2cm,
+			anchor=south west, text width=2cm, align=center] (P) at (LLP) {$\vb*{T}$};
+
+		% Feedback control policy
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm,
+			anchor=south west, text width=1cm, align=center] (K) at (LLK) {$\vb*{K}$};
+
+		% Bounded disturbance map
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm,
+			anchor=south west, text width=1cm, align=center] (D) at (LLDelta) {$\vb*{\Delta}$};
+
+		% Input-to-state (LLFT) path
+		\draw[-] ($(P.0) + (0,-0.5)$) -- ($(P.0) + (0.7,-0.5)$);
+		\draw[->] ($(P.0) + (0.7,-0.5)$) |- node[right, pos=0.25]{\footnotesize $\vb*{y}$} (K);
+		\draw[-] (K) -| node[left, pos=0.75]{\footnotesize $\vb*{u}$} ($(P.0) - (2.85,0.5)$);
+		\draw[->] ($(P.0) - (2.85,0.5)$) -- ($(P.0) - (2.25,0.5)$);
+
+		% Disturbance-to-performance (ULFT) path
+		\draw[-] ($(P.0) + (0,0.5)$) -- ($(P.0) + (0.7,0.5)$);
+		\draw[->] ($(P.0) + (0.7,0.5)$) |- node[right, pos=0.25]{\footnotesize $\vb*{z}$} (D);
+		\draw[-] (D) -| node[left, pos=0.75]{\footnotesize $\vb*{w}$} ($(P.0) - (2.85,-0.5)$);
+		\draw[->] ($(P.0) - (2.85,-0.5)$) -- ($(P.0) - (2.25,-0.5)$);
+	\end{tikzpicture}
+    }
+    \caption{\small Closed-loop plant with uncertainty.}
+    \label{fig:closed_loop_plant}
+\end{subfigure}
+
+\caption{Common forms of the generalized plant used for robust control analysis.}
+\label{fig:robust_plant_diagrams}
+\end{figure}
+
+The systems in Figure \ref{fig:lower_lfr_plant} and Figure \ref{fig:upper_lfr_plant} are the respective lower and upper linear fractional representations (LFRs) of the plant, and their equations can be found in \cite{doyle1991review}.  The lower LFR in Figure \ref{fig:lower_lfr_plant}, given by $\vb*{T}_{K}: \vb*{w} \rightarrow \vb*{z}$, will be used to verify robust stability using the small-gain theorem \cite{sandberg1964frequency, zames1966input}.  Specifically, it is a well-known fact that if $||\vb*{T}_{K}||_{\infty} < \gamma$, then the system in Figure \ref{fig:closed_loop_plant} is guaranteed to be stable for the set of perturbations $\vb*{\Delta}$ such that $||\vb*{\Delta}||_{\infty} \leq 1/\gamma$.  This is an instance of the $\mathcal{H}_{\infty}$ suboptimal design problem \cite{basar1989dynamic, bacsar2008h}, and to achieve an optimal control policy $\vb*{K}$, the minimum value of $\gamma$ is found via search.
+
+The state-space problem formulation of an $\mathcal{H}_{\infty}$ (sub-)optimal control for plant \eqref{eq:state_space_equations_T0} has several variants, depending on whether perfect measurements are available or the (possibly finite) time horizon the control has to act.  Generally, the solutions involve dynamic controllers with internal state (e.g., to estimate the disturbance) \cite{basar1989dynamic, bacsar2008h}.  While these solutions are well-understood when the plant is known, corresponding data-driven solutions are out of scope of this work.  Thus, for this thesis, simplifications are made to solve the $\mathcal{H}_{2}$ and $\mathcal{H}_{\infty}$ problems using a static state feedback policy $\vb*{u}_{k} = -\vb*{K}_{b}\vb*{x}_{k}$.  The simplifications to \eqref{eq:state_space_equations_T0} are:
+
+\begin{equation}
+\label{eq:lq_performance}
+\begin{aligned}
+	&\vb*{C}_{2} = \vb*{I}, \hspace{10pt}
+	\vb*{D}_{12} = \vb*{D}_{22} = \vb*{0}, \hspace{10pt}
+	\vb*{D}_{21} = \vb*{0},\\
+	&\vb*{C}_{1}^{T}\vb*{C}_{1} =  \vb*{Q}_{x}, \hspace{10pt}
+	\vb*{D}_{11}^{T}\vb*{D}_{11} = \vb*{R}_{u}, \hspace{10pt}
+	\vb*{C}_{1}^{T} \vb*{D}_{11} = \vb*{0}
+\end{aligned}
+\end{equation}\\
+where $\vb*{Q}_{x}$ and $\vb*{R}_{u}$ are the LQ cost weighting matrices.  As a result, the $\mathcal{H}_{2}$ optimal control is equivalent to the LQR, and the $\mathcal{H}_{\infty}$ (sub-)optimal control is essentially a more robust variant of the LQR.  Using $||\vb*{T}_{K}||_{\infty}$ as a standard metric allows basic comparisons of robustness to be made relatively easily between model-based and data-driven methods of optimizing closed-loop performance using an LQ-type cost function.
+
+\section{Linear Quadratic Optimal Control}
+Consider a discrete, open-loop LTI system with a state-space realization given by
+\begin{equation}
+\begin{aligned}
+	\vb*{x}_{k+1} &= \vb*{A} \vb*{x}_{k} + \vb*{B} \vb*{u}_{k}\\
+	\vb*{y}_{k} &= \vb*{x}_{k}
+\end{aligned} \label{eq-linear-state-dynamics}
+\end{equation}
+where $\vb*{x} \in \mathbb{R}^{n_{x}}$ is the state, $\vb*{u} \in \mathbb{R}^{n_{u}}$ is the control input, and $\vb*{y} \in \mathbb{R}^{n_{y}}$ is the measurement.  The infinite-horizon objective is to find the control policy which minimizes the quadratic objective function:
+\begin{equation}
+\begin{aligned}
+	J &= \lim_{N \to \infty} \sum_{k = 1}^{N} \big{(} \vb*{x}_{k}^{T} \vb*{Q}_{x} \vb*{x}_{k} + \vb*{u}_{k}^{T} \vb*{R}_{u} \vb*{u}_{k} \big{)}
+\end{aligned} \label{eq-optimal-cost-function}
+\end{equation}
+where cost weighting matrices $\vb*{Q}_{x} \in \mathbb{R}^{n_{x} \times n_{x}}$ and $\vb*{R}_{u} \in \mathbb{R}^{n_{u} \times n_{u}}$ are tunable, but restricted to the constraints $\vb*{Q}_{x} = \vb*{Q}_{x}^{T} \geq \vb*{0}$ and $\vb*{R}_{u} = \vb*{R}_{u}^{T} > \vb*{0}$.  It is well-known that the solution to this optimization problem is the LQ regulator, a static state feedback policy of the form
+\begin{equation}
+\begin{aligned}
+	\vb*{u}_{k} &= -\underbrace{
+		(\vb*{R}_{u} + \vb*{B}^{T}\vb*{P}\vb*{B})^{-1}\vb*{B}^{T}\vb*{P}\vb*{A}
+	}_{\text{\normalsize $\vb*{K}_{b}$}}
+	\vb*{x}_{k}
+\end{aligned} \label{eq-static-lqr-control}
+\end{equation}
+where matrix $\vb*{P} = \vb*{P}^{T} \ge \vb*{0}$ is found by solving an algebraic Riccati equation (ARE) given by
+\begin{equation}
+\begin{aligned}
+	\vb*{P} &= \vb*{Q}_{x} + \vb*{A}^{T}\vb*{P}\vb*{A} - (\vb*{A}^{T}\vb*{P}\vb*{B})(\vb*{R}_{u}
+		 + \vb*{B}^{T}\vb*{P}\vb*{B})^{-1}\vb*{B}^{T}\vb*{P}\vb*{A}\\
+\end{aligned} \label{eq-lqr-dare}
+\end{equation}
+
+The LQ optimal control can be derived using the calculus of variations \cite{stengel, kirk}, dynamic programming \cite{bertsekas2012dynamic}, or reinforcement learning \cite{lewis2009reinforcement}.
+
+\section{$\mathcal{H}_{2}$ and $\mathcal{H}_{\infty}$ Robust Control}
+Consider a discrete, open-loop LTI system with a state-space realization given by
+\begin{subequations}
+\begin{align}
+	\vb*{x}_{k+1} &= \vb*{A}\vb*{x}_{k} + \vb*{B}\vb*{u}_{k} + \vb*{D}\vb*{w}_{k} \label{discrete_linear_plant_dynamics}\\
+	%
+	\vb*{z}_{k} &= \vb*{H}\vb*{x}_{k} + \vb*{G}\vb*{u}_{k} \label{discrete_linear_performance}\\
+	%
+	\vb*{y}_{k} &= \vb*{x}_{k}\label{discrete_linear_plant_measurement}
+	%
+\end{align} \label{discrete_linear_plant}
+\end{subequations}
+where $\vb*{x} \in \mathbb{R}^{n_{x}}$ is the state, $\vb*{u} \in \mathbb{R}^{n_{u}}$ is the control input, $\vb*{w} \in \mathbb{R}^{n_{w}}$ is the disturbance, $\vb*{z} \in \mathbb{R}^{n_{z}}$ is the performance output, and $\vb*{y} \in \mathbb{R}^{n_{y}}$ is the measurement.  Additionally, $\vb*{H}^{T} \begin{bmatrix} \vb*{H} & \vb*{G}\end{bmatrix} = \begin{bmatrix} \vb*{Q}_{x} & \vb*{0} \end{bmatrix}$ and $\vb*{G}^{T}\vb*{G} = \vb*{R}_{u}$.  Applying $\vb*{u}_{k} = -\vb*{K}_{b}\vb*{x}_{k}$ to \eqref{discrete_linear_plant_dynamics} produces closed-loop dynamics
+\begin{subequations}
+\label{discrete_linear_plant_cl}
+\begin{align}
+	\vb*{x}_{k+1} &= (\vb*{A} - \vb*{B}\vb*{K}_{b})\vb*{x}_{k} + \vb*{D}\vb*{w}_{k} \label{discrete_linear_plant_dynamics_cl}\\
+	%
+	\vb*{z}_{k} &= (\vb*{H} - \vb*{G}\vb*{K}_{b})\vb*{x}_{k} \label{discrete_linear_performance_cl}
+	%
+\end{align}
+\end{subequations}
+and the transfer function from disturbance to performance output is
+\begin{equation}
+\begin{aligned}
+	\vb*{T}_{K}(z) &\triangleq (\vb*{H} - \vb*{G}\vb*{K}_{b})(z\vb*{I} - (\vb*{A} - \vb*{B}\vb*{K}_{b})^{-1})\vb*{D}
+\end{aligned} \label{discrete_transfer_matrix}
+\end{equation}
+
+\subsection{Infinite-Horizon $\mathcal{H}_{2}$ Performance Criteria}
+For $\mathcal{H}_{2}$ optimal control, the infinite-horizon objective is to find the control policy which minimizes the $\mathcal{H}_{2}$ norm of $\vb*{T}_{K}$, which is equivalent to minimizing the following cost function
+\begin{equation}
+\begin{aligned}
+	%
+	J &= \lVert \vb*{T}_{K} \rVert_{2}^{2} \triangleq \lVert \vb*{z} \rVert_{2}^{2} = \lim_{N \to \infty} \sum_{k = 1}^{N} (\vb*{z}_{k}^{T}\vb*{z}_{k})
+	= \lim_{N \to \infty} \sum_{k = 1}^{N} \big{(} \vb*{x}_{k}^{T} \vb*{Q}_{x} \vb*{x}_{k} + \vb*{u}_{k}^{T} \vb*{R}_{u} \vb*{u}_{k} \big{)}
+\end{aligned} \label{T_mu_h2_norm}
+\end{equation}
+which, by design, is equivalent to Equation \eqref{eq-optimal-cost-function} and solved using Equation \eqref{eq-lqr-dare}.  The $\mathcal{H}_{2}$ controller minimizes the power of the impulse response of Equation \eqref{discrete_linear_plant_dynamics_cl} due to a non-zero initial condition, or equivalently, the mean-square response of Equation \eqref{discrete_transfer_matrix} to a white noise disturbance with unit covariance \cite{van2020data}.  The former is associated with LQR and the latter with LQG (where the expected value of Equation \eqref{T_mu_h2_norm} is minimized), but the optimal control given by Equation \eqref{eq-static-lqr-control} is the same in both cases due to the separation principle.
+
+\subsection{Infinite-Horizon $\mathcal{H}_{\infty}$ Performance Criteria}
+For $\mathcal{H}_{\infty}$ optimal control, the objective is to find the control policy which minimizes the matrix norm of $\vb*{T}_{K}$, given by its maximum (frequency-dependent) singular value as
+\begin{equation}
+\begin{aligned}
+	||\vb*{T}_{K}||_{\infty} &\triangleq \sup_{\omega \in \left[0, 2 \pi \right]} ||\vb*{T}_{K}(e^{j\omega})||
+	= \sup_{\omega \in \left[0, 2 \pi \right]} \bar{\sigma}(\vb*{T}_{K}(e^{j\omega}))
+	= \sup_{\vb*{w} \in L^{2}} \frac{||\vb*{z}||_{2}}{||\vb*{w}||_{2}}
+\end{aligned} \label{hinf_norm_cost}
+\end{equation}
+
+This can be solved by iteratively solving the $\mathcal{H}_{\infty}$ sub-optimal control problem, which ensures $||\vb*{T}_{K}||_{\infty}$ is bounded by a scalar gain $\gamma$, i.e., $||\vb*{T}_{K}||_{\infty} \leq \gamma$.  By re-writing this inequality as $||\vb*{T}_{K}||_{2}^{2} \leq \gamma^{2}  ||\vb*{w}||_{2}^{2}$, it can be recast as an optimization problem of finding the smallest $\gamma \geq 0$ under which the cost function
+\begin{equation}
+\begin{aligned}
+	J_{\gamma} &= \lVert \vb*{z} \rVert_{2}^{2} - \gamma^{2} \lVert \vb*{w} \rVert_{2}^{2}
+	= J - \gamma^{2} \lVert \vb*{w} \rVert_{2}^{2} \label{eq-lq-cost-infinite-w}
+\end{aligned}
+\end{equation}
+where $J$ is given by Equation \eqref{T_mu_h2_norm}, is bounded by zero, which provides the $\mathcal{H}_{\infty}$ optimal solution.  Basar \cite{bacsar2008h} showed that solving the discrete generalized/game algebraic Riccati equation (DGARE)
+\begin{equation}
+\begin{aligned}
+	\vb*{P} &= \vb*{Q}_{x} + \vb*{A}^{T}\vb*{P}(\vb*{I}_{n_{x}}
+		+ (\vb*{B}\vb*{R}_{u}^{-1}\vb*{B}^{T} - \gamma^{-2}\vb*{D}\vb*{D}^{T})\vb*{P})^{-1}\vb*{A}\\
+\end{aligned} \label{eq-hinf-dgare}
+\end{equation}
+for matrix $\vb*{P} \in \mathbb{S}^{n_{x}}$, $\vb*{P} > \vb*{0}$ which also fulfills the spectral radius condition 
+\begin{equation}
+\begin{aligned}
+	\vb*{\Xi} := (\gamma^{2}\vb*{I} - \vb*{B}^{T}\vb*{P}\vb*{B}) > \vb*{0}
+\end{aligned} \label{eq-hinf-existence}
+\end{equation}
+provides the saddle-point solution, a static state feedback control policy given by
+\begin{equation}
+\begin{aligned}
+	\vb*{u}_{k} &= -\underbrace{
+	\vb*{R}_{u}^{-1}\vb*{B}^{T}\vb*{P}(\vb*{I}_{n_{x}}
+		+ (\vb*{B}\vb*{R}_{u}^{-1}\vb*{B}^{T} - \gamma^{-2}\vb*{D}\vb*{D}^{T})\vb*{P})^{-1}\vb*{A}
+	}_{\text{\normalsize $\vb*{K}_{b}$}}
+	\vb*{x}_{k}
+\end{aligned} \label{eq-static-hinf-control}
+\end{equation}
+
+A relatively brute-force method, based on bisection, determines the minimum $\gamma$ by iteratively solving Equation \eqref{eq-hinf-dgare}, checking the spectral radius condition using Equation \eqref{eq-hinf-existence}, and verifying the poles of Equation \eqref{discrete_linear_plant_dynamics_cl} are stable with feedback policy given by Equation \eqref{eq-static-hinf-control}.  The smallest value of $\gamma$ which fulfills these conditions can be used to compute an $\mathcal{H}_{\infty}$ optimal control policy using Equation \eqref{eq-static-hinf-control}.
+
+The LQR/$\mathcal{H}_{2}$ solution can be obtained by setting $\gamma = \infty$, in which case Equation \eqref{eq-hinf-dgare} reduces to Equation \eqref{eq-lqr-dare} and Equation \eqref{eq-static-hinf-control} reduces to Equation \eqref{eq-static-lqr-control}.  Thus, both problems can be solved using the DGARE.  Numerical methods for solving discrete AREs are discussed in Appendix \ref{appendix:numericalMethods}.
+
+\section{Linear Matrix Inequalities}
+Many problems within engineering can be formulated as convex optimization problems \cite{boyd1990linear, boyd1994linear, balakrishnan1995connections, skogestad2005multivariable, liu2017survey}, in particular LMIs \cite{caverly2019lmi}, allowing both feasibility checks and optimal solutions to be obtained automatically using, e.g., interior-point methods.  An LMI is an optimization problem which can be written as the following semidefinite program (SDP)
+\begin{equation}
+\label{eq-generic-sdp}
+\begin{aligned}
+	\min \quad & \vb*{c}^{T}\vb*{x}\\
+	\textrm{s.t.} \quad & \vb*{F}(\vb*{x}) > \vb*{0}\\
+\end{aligned}
+\end{equation}
+where $\vb*{c} \in \mathbb{R}^{m}$ is a vector of problem data and $\vb*{F}(\vb*{x})$ is a matrix equation specified using $m+1$ symmetric matrices $\vb*{F}_{0}, \vb*{F}_{1}, \vb*{F}_{2}, ... \vb*{F}_{m} \in \mathbb{R}^{m \times m}$
+\begin{equation}
+\begin{aligned}
+	\vb*{F}(\vb*{x}) \triangleq \vb*{F}_{0} + \vb*{x}_{1}\vb*{F}_{1} + \vb*{x}_{2}\vb*{F}_{2} ... + \vb*{x}_{m}\vb*{F}_{m}
+\end{aligned}
+\end{equation}
+
+A detailed literature survey of LMI properties, techniques, parsers, and solvers is provided by \cite{caverly2019lmi}, and for this work the two main results leveraged include Lyapunov stability and $\mathcal{H}_{2}$ norm minimization, for which data-driven equivalents exist.  Data-driven $\mathcal{H}_{\infty}$ LMIs were recently provided by \cite{berberich2020robust, berberich2022combining}, but due to time constraints were not included in this work.
+
+\subsection{Closed-Loop Lyapunov Stability}
+Existence of a quadratic Lyapunov function is a necessary and sufficient condition for a stable linear system, and can be verified using an LMI provided by \cite{bernstein2009matrix,caverly2019lmi}.  For closed-loop system given by Equation \eqref{discrete_linear_plant_cl}, this implies the existence of two positive-definite matrices $\vb*{P} \in \mathbb{S}^{n_{x}}$, $\vb*{P} > \vb*{0}$ and $\vb*{Q} \in \mathbb{S}^{n_{x}}$, $\vb*{Q} > \vb*{0}$ which satisfy the discrete Lyapunov equation:
+\begin{equation}
+\label{eq-lyapunov}
+\begin{aligned}
+	(\vb*{A} - \vb*{B}\vb*{K}_{b}) \vb*{P} (\vb*{A} - \vb*{B}\vb*{K}_{b})^{T} - \vb*{P} + \vb*{Q} = \vb*{0}
+\end{aligned}
+\end{equation}
+or equivalently, the discrete Lyapunov inequality
+\begin{equation}
+\label{eq-lyapunov2}
+\begin{aligned}
+	(\vb*{A} - \vb*{B}\vb*{K}_{b}) \vb*{P} (\vb*{A} - \vb*{B}\vb*{K}_{b})^{T} - \vb*{P} \leq \vb*{0}
+\end{aligned}
+\end{equation}
+which, using the Schur complement, can be represented as the LMI
+\begin{equation}
+\label{eq-lyapunov-lmi}
+\begin{aligned}
+	\begin{bmatrix}
+		\vb*{P} & (\vb*{A} - \vb*{B}\vb*{K}_{b})\vb*{P}\\
+		\vb*{P}^{T}(\vb*{A} - \vb*{B}\vb*{K}_{b})^{T} & \vb*{P}\\
+	\end{bmatrix} \geq \vb*{0}
+\end{aligned}
+\end{equation}
+
+This can also be interpreted using the spectral radius; for a matrix $\tilde{\vb*{A}}$ and scalar $\delta$, $\rho(\tilde{\vb*{A}}) < \delta$ if there exists a matrix $\vb*{P}$ such that $\tilde{\vb*{A}}\vb*{P}\tilde{\vb*{A}}^{T} - \delta^{2}\vb*{P} < \vb*{0}$, which is equivalent to Equation \eqref{eq-lyapunov2} for $\tilde{\vb*{A}} = (\vb*{A} - \vb*{B}\vb*{K}_{b})$ and $\delta = 1$.  This ensures the closed-loop poles are stable.
+
+\subsection{Infinite-Horizon $\mathcal{H}_{2}$ Performance Criteria}
+Solving the LQR/$\mathcal{H}_{2}$ problem using Riccati equations is a well-understood technique leveraging the analytically known form of the solution and its gradient to compute the optimal control.  The problem can also be expressed as the solution to a more general constrained convex optimization problem, allowing other constraints to be more easily incorporated \cite{wang2014localized, anderson2019system}.
+
+It is well-known that for closed-loop system given by Equation \eqref{discrete_linear_plant_cl}, the cost function is quadratic.  This can be seen by expanding Equation \eqref{T_mu_h2_norm} using Equation \eqref{discrete_linear_performance_cl} to get
+\begin{equation}
+\label{J_K_h2_cost}
+\begin{aligned}
+	%
+	J(\vb*{K}_{b}) &= \lim_{N \to \infty} \sum_{k = 1}^{N} \big{(}(\vb*{H} - \vb*{G}\vb*{K}_{b})\vb*{x}_{k})^{T} \big{)}
+		\big{(}(\vb*{H} - \vb*{G}\vb*{K}_{b})\vb*{x}_{k}\big{)}\\
+	&= \lim_{N \to \infty} \sum_{k = 1}^{N} \vb*{x}_{k}^{T}(\vb*{H}^{T} - \vb*{K}_{b}^{T}\vb*{G}^{T})(\vb*{H} - \vb*{G}\vb*{K}_{b})\vb*{x}_{k}\\
+	&= \lim_{N \to \infty} \sum_{k = 1}^{N} \vb*{x}_{k}^{T}(\vb*{H}^{T}\vb*{H}
+		- \vb*{K}_{b}^{T}\vb*{G}^{T}\vb*{H} - \vb*{H}^{T}\vb*{G}\vb*{K}_{b}
+		+ \vb*{K}_{b}^{T}\vb*{G}^{T}\vb*{G}\vb*{K}_{b})\vb*{x}_{k}\\
+	&= \lim_{N \to \infty} \sum_{k = 1}^{N} \vb*{x}_{k}^{T}(\vb*{H}^{T}\vb*{H}
+		+ \vb*{K}_{b}^{T}\vb*{G}^{T}\vb*{G}\vb*{K}_{b})\vb*{x}_{k}\\
+	&= \lim_{N \to \infty} \sum_{k = 1}^{N} \vb*{x}_{k}^{T}(\vb*{Q}_{x}
+		+ \vb*{K}_{b}^{T}\vb*{R}_{u}\vb*{K}_{b})\vb*{x}_{k}\\
+\end{aligned}
+\end{equation}
+
+According to \cite{haddad1991mixed}, if the closed-loop system given by Equation \eqref{discrete_linear_plant_cl} is asymptotically stable, then Equation \eqref{J_K_h2_cost} can be written using the solution to the discrete Lyapunov equation \eqref{eq-lyapunov} for $\vb*{Q} = \vb*{D}\vb*{D}^{T}$ \cite{feron1992numerical, chen2012optimal, de2019formulas}, with some algebraic manipulation based on the properties of matrix trace, as
+\begin{equation}
+\label{J_K_h2_cost_TrQR}
+\begin{aligned}
+	J(\vb*{K}_{b}) &= \text{Tr}(\vb*{P}(\vb*{H}^{T}\vb*{H} + \vb*{K}_{b}^{T}\vb*{G}^{T}\vb*{G}\vb*{K}_{b}))\\
+	&= \text{Tr}(\vb*{H}^{T}\vb*{H}\vb*{P} + \vb*{G}\vb*{K}_{b}\vb*{P}\vb*{K}_{b}^{T}\vb*{G}^{T})\\
+	&= \text{Tr}(\vb*{Q}_{x}\vb*{P}) + \text{Tr}(\vb*{R}_{u}^{1/2}\vb*{K}_{b}\vb*{P}\vb*{K}_{b}^{T}\vb*{R}_{u}^{1/2})\\
+\end{aligned}
+\end{equation}
+and in this context, $\vb*{P}$ is the controllability Gramian of Equation \eqref{discrete_linear_plant_cl}.  This form allows the infinite-horizon LQR/$\mathcal{H}_{2}$ problem to be written as a constrained search for matrices $\vb*{P} \in \mathbb{R}^{n_{x} \times n_{x}}$, and $\vb*{K}_{b} \in \mathbb{R}^{n_{u} \times n_{x}}$.  The general optimization problem is thus
+\begin{equation}
+\label{eq-h2-sdp}
+\begin{aligned}
+	\underset{\vb*{P}, \vb*{K}_{b}}{\min} \quad & \text{Tr}(\vb*{Q}_{x}\vb*{P})
+		+ \text{Tr}(\vb*{R}_{u}^{1/2}\vb*{K}_{b}\vb*{P}\vb*{K}_{b}^{T}\vb*{R}_{u}^{1/2})\\
+	\textrm{s.t.} \quad & \begin{cases}
+		\vb*{P} \geq \vb*{D}\vb*{D}^{T}\\
+		(\vb*{A} - \vb*{B}\vb*{K}_{b})\vb*{P}(\vb*{A} - \vb*{B}\vb*{K}_{b})^{T} - (\vb*{P} - \vb*{D}\vb*{D}^{T}) \leq \vb*{0}\\
+	\end{cases}\\
+\end{aligned}
+\end{equation}
+
+While the second constraint of Equation \eqref{eq-h2-sdp} is the discrete Lyapunov inequality and can be written as an LMI using the Schur complement like was done for Equation \eqref{eq-lyapunov-lmi}, the general form of the cost function is not linear in all decision variables due to the term $\vb*{K}_{b}\vb*{P}\vb*{K}_{b}^{T}$.  Well-known LMI methods can mitigate this using variable changes, e.g. \cite{berkenkamp2015derivation, berkenkamp2015safe, caverly2019lmi}.  These are omitted for brevity, since their derivation differs from the data-driven LMIs provided in Chapter \ref{chap:DataDrivenControl}.  In this work, model-based LQR/$\mathcal{H}_{2}$ problems are solved using a Riccati equation.

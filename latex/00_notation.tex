@@ -1,0 +1,75 @@
+\renewcommand{\nomname}{List of Symbols}
+
+\nomenclature[00]{$\mathbb{R}^{n \times m}$}{set of $n$-by-$m$ real matrices}
+\nomenclature[01]{$\mathbb{S}^{n}$}{set of $n$-by-$n$ symmetric matrices}
+
+\nomenclature[02]{$:=$}{defined by}
+\nomenclature[03]{$=:$}{defines}
+\nomenclature[04]{$\forall$}{for all}
+
+\nomenclature[05]{$\vert \vb*{v}_{k} \vert$}{Euclidean norm of vector $\vb*{v}$ at time sample $k$}
+\nomenclature[06]{$\lVert \vb*{v}_{k} \rVert$}{a Hilbert space norm of vector $\vb*{v}$ at time sample $k$}
+\nomenclature[07]{$\vb*{v}^{T}$}{transpose of vector $\vb*{v}$}
+\nomenclature[08]{$\vb*{M}^{T}$}{transpose of matrix $\vb*{M}$}
+\nomenclature[09]{$\dot{\vb*{v}}$}{time derivative of vector $\vb*{v}$}
+\nomenclature[10]{$\vb*{I}_{n}$}{identity matrix of size $n \times n$}
+
+\nomenclature[11]{$\vb*{x}$}{internal state variable; $\vb*{x}_{k}$ in discrete time, $\vb*{x}(t)$ in continuous time}
+\nomenclature[12]{$\vb*{u}$}{controlled input variable; $\vb*{u}_{k}$ in discrete time, $\vb*{u}(t)$ in continuous time}
+\nomenclature[13]{$\vb*{w}$}{disturbance input variable; $\vb*{w}_{k}$ in discrete time, $\vb*{w}(t)$ in continuous time}
+\nomenclature[14]{$\vb*{y}$}{measurement output variable; $\vb*{y}_{k}$ in discrete time, $\vb*{y}(t)$ in continuous time}
+\nomenclature[15]{$\vb*{z}$}{performance output variable; $\vb*{z}_{k}$ in discrete time, $\vb*{z}(t)$ in continuous time}
+
+\nomenclature[16]{$\vb*{\mu} \in \mathcal{M}$}{control policy, belonging to policy space $\mathcal{M}$}
+\nomenclature[17]{$\vb*{\nu} \in \mathcal{N}$}{disturbance policy, belonging to policy space $\mathcal{N}$}
+
+\nomenclature[18]{$\ll T \gg$}{induced norm of operator $T$}
+\nomenclature[19]{$\lVert T \rVert_{2}$}{Hilbert space 2-norm of operator $T$, also denoted $\mathcal{H}_{2}$}
+\nomenclature[20]{$\lVert T \rVert_{\infty}$}{Hilbert space infinity-norm of operator $T$, also denoted $\mathcal{H}_{\infty}$}
+
+\nomenclature[21]{$J$}{performance objective function}
+\nomenclature[22]{$Tr\left[ \vb*{\Lambda} \right]$}{trace of square matrix $\vb*{\Lambda}$}
+\nomenclature[23]{$\rho(\vb*{\Lambda})$}{spectral radius of square matrix $\vb*{\Lambda}$}
+
+\nomenclature[24]{$L$}{system Lagrangian}
+\nomenclature[25]{$K$}{system kinetic energy}
+\nomenclature[26]{$U$}{system potential energy}
+\nomenclature[27]{$\vb*{q}$}{system position variable; $\vb*{q}_{k}$ in discrete time, $\vb*{q}(t)$ in continuous time}
+\nomenclature[28]{$\vb*{\tau}$}{system input variable; $\vb*{\tau}_{k}$ in discrete time, $\vb*{\tau}(t)$ in continuous time}
+\nomenclature[29]{$\vb*{M}$}{system inertia/mass matrix}
+\nomenclature[30]{$\vb*{C}(\vb*{q}, \dot{\vb*{q}})$}{system Coriolis matrix}
+\nomenclature[31]{$\vb*{g}(\vb*{q})$}{system static/gravity matrix}
+\nomenclature[32]{$\vb*{B}_{\tau}$}{system input mapping matrix}
+
+\nomenclature[33]{$\vb*{A}_{c}$}{continuous-time state transition matrix of linear dynamical plant}
+\nomenclature[34]{$\vb*{B}_{c}$}{continuous-time input mapping matrix of linear dynamical plant}
+\nomenclature[35]{$\vb*{D}_{c}$}{continuous-time disturbance mapping matrix of linear dynamical plant}
+\nomenclature[36]{$\vb*{A}$}{discrete-time state transition matrix of linear dynamical plant}
+\nomenclature[37]{$\vb*{B}$}{discrete-time input mapping matrix of linear dynamical plant}
+\nomenclature[38]{$\vb*{D}$}{discrete-time disturbance mapping matrix of linear dynamical plant}
+
+\nomenclature[39]{DP}{dynamic programming}
+\nomenclature[40]{RL}{reinforcement learning}
+\nomenclature[41]{LQ}{linear quadratic}
+\nomenclature[42]{ARE}{algebraic Riccati equation}
+\nomenclature[43]{RDE}{Riccati differential equation}
+\nomenclature[44]{DARE}{discrete algebraic Riccati equation}
+\nomenclature[45]{GARE}{generalized (game) Riccati equation}
+\nomenclature[46]{DGARE}{discrete generalized (game) algebraic Riccati equation}
+\nomenclature[47]{DMD}{Dynamic Mode Decomposition}
+\nomenclature[48]{DMDc}{Dynamic Mode Decomposition with Control}
+
+\nomenclature[49]{LFR}{linear fractional representation}
+\nomenclature[50]{LFT}{linear fractional transformation}
+\nomenclature[51]{ULFT}{upper linear fractional transformation}
+\nomenclature[52]{LLFT}{lower linear fractional transformation}
+
+\nomenclature[53]{n.d.}{(of a matrix) negative definite}
+\nomenclature[54]{n.n.d.}{(of a matrix) nonnegative definite}
+\nomenclature[55]{p.d.}{(of a matrix) positive definite}
+
+\nomenclature[56]{$\vb*{L}$}{loop transfer function; $\vb*{L}(z)$ in discrete time, $\vb*{L}(s)$ in continuous time}
+\nomenclature[57]{$\vb*{S}$}{sensitivity function $\vb*{S} = [\vb*{I} + \vb*{L}]^{-1}$}
+\nomenclature[58]{$\vb*{T}$}{complementary sensitivity function $\vb*{T} = \vb*{L}[\vb*{I} + \vb*{L}]^{-1}$}
+
+\printnomenclature[1in]

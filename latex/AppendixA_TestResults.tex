@@ -1,0 +1,881 @@
+\chapter{Test Results with Parameter Uncertainty}
+\label{appendix:testResultsUncertainty}
+Table \ref{table:notation_tables} provides the abbreviated notation used in tabulated data.  Recall that ``baseline'' refers to model-based control synthesis using a known linear plant, ``indirect'' refers to model-based control synthesis using an estimated linear plant, and ``direct'' refers to a model-free synthesis based on data-driven optimization using LMIs.
+\begin{table}[H]
+\centering
+\begin{tabular}{|c||c|c|}
+	\hline
+	\textbf{Type} & \textbf{Approach} & \textbf{Abbreviation}\\
+	\hline
+	\multirow{3}*{$\mathcal{H}_{2}$ control}
+	& Baseline & C1\\
+	\cline{2-3}
+	& Indirect & C2\\
+	\cline{2-3}
+	& Direct & C3\\
+	\hline
+	\multirow{2}*{$\mathcal{H}_{\infty}$ control}
+	& Baseline & C4\\
+	\cline{2-3}
+	& Indirect & C5\\
+	\hline
+	Lyapunov-stable control & Direct & C6\\
+	\hline
+\end{tabular}
+\caption{Abbreviated notation for tabulated results.}
+\label{table:notation_tables}
+\end{table}
+
+\section{Percentage of Stable Controllers}
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	 0\% & 100 & 97 & 100 & 100 & 98 & 95 \\
+	\hline
+	10\% & 100 & 100 & 100 & 100 & 99 & 93\\
+	\hline
+	20\% & 100 & 100 & 96 & 100 & 98 & 86\\
+	\hline
+	30\% & 100 & 99 & 96 & 100 & 94 & 87\\
+	\hline
+	40\% & 99 & 97 & 93 & 97 & 92 & 84\\
+	\hline
+	50\% & 97 & 92 & 88 & 97 & 83 & 82\\
+	\hline
+	60\% & 91 & 89 & 83 & 90 & 77 & 81\\
+	\hline
+\end{tabular}
+\caption{Percentage of stable controllers (double integrator).}
+\label{table:percent_stable_double_integrator:unc}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	 0\% & 100 & 100 & 100 & 100 & 100 & 100 \\
+	\hline
+	10\% & 92 & 90 & 99 & 92 & 91 & 97\\
+	\hline
+	20\% & 85 & 86 & 94 & 84 & 84 & 97\\
+	\hline
+	30\% & 77 & 81 & 97 & 79 & 77 & 93\\
+	\hline
+	40\% & 76 & 77 & 93 & 77 & 76 & 93\\
+	\hline
+	50\% & 69 & 67 & 81 & 69 & 69 & 81\\
+	\hline
+	60\% & 70 & 71 & 79 & 70 & 71 & 79\\
+	\hline
+\end{tabular}
+\caption{Percentage of stable controllers (cart pole).}
+\label{table:percent_stable_cart_pole:unc}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	 0\% & 100 & 100 & 99 & 100 & 99 & 97 \\
+	\hline
+	10\% & 100 & 100 & 98 & 100 & 100 & 100\\
+	\hline
+	20\% & 100 & 99 & 93 & 100 & 98 & 100\\
+	\hline
+	30\% & 98 & 97 & 82 & 98 & 88 & 83\\
+	\hline
+	40\% & 96 & 97 & 73 & 93 & 86 & 77\\
+	\hline
+	50\% & 92 & 82 & 68 & 90 & 78 & 76\\
+	\hline
+	60\% & 89 & 87 & 67 & 88 & 63 & 74\\
+	\hline
+\end{tabular}
+\caption{Percentage of stable controllers (robot arm).}
+\label{table:percent_stable_robot_arm:unc}
+\end{table}
+
+\section{$\mathcal{H}_{\infty}$ Norms}
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 4.629$\pm$0.000 & 4.629$\pm$0.000 & 1.782$\pm$0.811 & 2.565$\pm$0.000 & 2.565$\pm$0.000 & 1.088$\pm$0.820\\
+	\hline
+	10\% & 4.629$\pm$0.000 & 4.632$\pm$0.043 & 1.834$\pm$0.795 & 2.565$\pm$0.000 & 2.565$\pm$0.025 & 1.116$\pm$0.867\\
+	\hline
+	20\% & 4.629$\pm$0.000 & 4.638$\pm$0.082 & 1.968$\pm$0.847 & 2.565$\pm$0.000 & 2.565$\pm$0.051 & 1.172$\pm$0.900\\
+	\hline
+	30\% & 4.629$\pm$0.000 & 4.654$\pm$0.118 & 2.025$\pm$0.829 & 2.565$\pm$0.000 & 2.565$\pm$0.075 & 1.408$\pm$1.129\\
+	\hline
+	40\% & 4.629$\pm$0.000 & 4.685$\pm$0.167 & 2.257$\pm$1.051 & 2.565$\pm$0.000 & 2.571$\pm$0.125 & 1.575$\pm$1.359\\
+	\hline
+	50\% & 4.629$\pm$0.000 & 4.672$\pm$0.144 & 2.424$\pm$1.146 & 2.565$\pm$0.000 & 2.574$\pm$0.137 & 1.663$\pm$1.404\\
+	\hline
+	60\% & 4.629$\pm$0.000 & 4.743$\pm$0.219 & 2.137$\pm$0.918 & 2.565$\pm$0.000 & 2.562$\pm$0.167 & 1.760$\pm$1.561\\
+	\hline
+\end{tabular}
+\caption{$\mathcal{H}_{\infty}$ norms of generalized plant (double integrator).}
+\label{table:hinfinity_norms_double_integrator:unc}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 3.829$\pm$0.000 & 3.826$\pm$0.000 & 6.414$\pm$0.000 & 2.250$\pm$0.000 & 2.253$\pm$0.000 & 7.195$\pm$0.000\\
+	\hline
+	10\% & 3.829$\pm$0.000 & 3.826$\pm$0.010 & 6.428$\pm$0.102 & 2.250$\pm$0.000 & 2.254$\pm$0.013 & 7.199$\pm$0.030\\
+	\hline
+	20\% & 3.829$\pm$0.000 & 3.824$\pm$0.019 & 6.418$\pm$0.162 & 2.250$\pm$0.000 & 2.253$\pm$0.024 & 7.204$\pm$0.055\\
+	\hline
+	30\% & 3.829$\pm$0.000 & 3.815$\pm$0.030 & 6.348$\pm$0.195 & 2.250$\pm$0.000 & 2.244$\pm$0.036 & 7.192$\pm$0.074\\
+	\hline
+	40\% & 3.829$\pm$0.000 & 3.820$\pm$0.025 & 6.366$\pm$0.202 & 2.250$\pm$0.000 & 2.250$\pm$0.035 & 7.196$\pm$0.071\\
+	\hline
+	50\% & 3.829$\pm$0.000 & 3.812$\pm$0.039 & 6.288$\pm$0.225 & 2.250$\pm$0.000 & 2.242$\pm$0.049 & 7.183$\pm$0.084\\
+	\hline
+	60\% & 3.829$\pm$0.000 & 3.799$\pm$0.044 & 6.239$\pm$0.258 & 2.250$\pm$0.000 & 2.224$\pm$0.057 & 7.169$\pm$0.079\\
+	\hline
+\end{tabular}
+\caption{$\mathcal{H}_{\infty}$ norms of generalized plant (cart pole).}
+\label{table:hinfinity_norms_cart_pole:unc}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 3.853$\pm$0.000 & 3.859$\pm$0.009 & 14.055$\pm$0.351 & 2.259$\pm$0.000 & 2.270$\pm$0.001 & 2.624$\pm$0.032\\
+	\hline
+	10\% & 3.853$\pm$0.000 & 3.851$\pm$0.215 & 13.787$\pm$2.313 & 2.259$\pm$0.000 & 2.211$\pm$0.502 & 2.605$\pm$0.080\\
+	\hline
+	20\% & 3.853$\pm$0.000 & 3.869$\pm$0.434 & 13.631$\pm$3.970 & 2.259$\pm$0.000 & 2.175$\pm$1.009 & 2.561$\pm$0.142\\
+	\hline
+	30\% & 3.853$\pm$0.000 & 4.084$\pm$0.747 & 14.729$\pm$4.727 & 2.259$\pm$0.000 & 2.734$\pm$1.423 & 2.534$\pm$0.148\\
+	\hline
+	40\% & 3.853$\pm$0.000 & 4.174$\pm$0.828 & 15.413$\pm$4.733 & 2.259$\pm$0.000 & 2.983$\pm$1.469 & 2.542$\pm$0.246\\
+	\hline
+	50\% & 3.853$\pm$0.000 & 3.795$\pm$0.652 & 14.213$\pm$4.622 & 2.259$\pm$0.000 & 2.765$\pm$1.732 & 2.470$\pm$0.236\\
+	\hline
+	60\% & 3.853$\pm$0.000 & 3.996$\pm$0.901 & 15.108$\pm$4.392 & 2.259$\pm$0.000 & 3.087$\pm$1.679 & 2.512$\pm$0.347\\
+	\hline
+\end{tabular}
+\caption{$\mathcal{H}_{\infty}$ norms of generalized plant (robot arm).}
+\label{table:hinfinity_norms_robot_arm:unc}
+\end{table}
+
+\section{Disk-Based Stability Margins}
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 1.183$\pm$0.000 & 1.183$\pm$0.000 & 0.913$\pm$0.070 & 1.119$\pm$0.000 & 1.119$\pm$0.000 & 0.873$\pm$0.105\\
+	\hline
+	10\% & 1.183$\pm$0.000 & 1.183$\pm$0.011 & 0.912$\pm$0.075 & 1.119$\pm$0.000 & 1.119$\pm$0.017 & 0.860$\pm$0.126\\
+	\hline
+	20\% & 1.183$\pm$0.000 & 1.182$\pm$0.024 & 0.910$\pm$0.084 & 1.119$\pm$0.000 & 1.119$\pm$0.034 & 0.841$\pm$0.158\\
+	\hline
+	30\% & 1.183$\pm$0.000 & 1.179$\pm$0.040 & 0.906$\pm$0.099 & 1.119$\pm$0.000 & 1.117$\pm$0.053 & 0.818$\pm$0.192\\
+	\hline
+	40\% & 1.183$\pm$0.000 & 1.172$\pm$0.065 & 0.905$\pm$0.103 & 1.119$\pm$0.000 & 1.105$\pm$0.080 & 0.786$\pm$0.178\\
+	\hline
+	50\% & 1.183$\pm$0.000 & 1.164$\pm$0.070 & 0.899$\pm$0.099 & 1.119$\pm$0.000 & 1.088$\pm$0.097 & 0.770$\pm$0.179\\
+	\hline
+	60\% & 1.183$\pm$0.000 & 1.159$\pm$0.127 & 0.902$\pm$0.121 & 1.119$\pm$0.000 & 1.067$\pm$0.151 & 0.742$\pm$0.194\\
+	\hline
+\end{tabular}
+\caption{Disk-based stability margins (double integrator).}
+\label{table:disk_margins_double_integrator:unc}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 0.542$\pm$0.000 & 0.541$\pm$0.000 & 0.163$\pm$0.000 & 0.601$\pm$0.000 & 0.600$\pm$0.000 & 0.105$\pm$0.000\\
+	\hline
+	10\% & 0.542$\pm$0.000 & 0.538$\pm$0.013 & 0.164$\pm$0.020 & 0.601$\pm$0.000 & 0.595$\pm$0.014 & 0.104$\pm$0.010\\
+	\hline
+	20\% & 0.542$\pm$0.000 & 0.522$\pm$0.037 & 0.179$\pm$0.054 & 0.601$\pm$0.000 & 0.574$\pm$0.040 & 0.109$\pm$0.044\\
+	\hline
+	30\% & 0.542$\pm$0.000 & 0.494$\pm$0.063 & 0.199$\pm$0.059 & 0.601$\pm$0.000 & 0.545$\pm$0.071 & 0.118$\pm$0.055\\
+	\hline
+	40\% & 0.542$\pm$0.000 & 0.494$\pm$0.060 & 0.206$\pm$0.067 & 0.601$\pm$0.000 & 0.549$\pm$0.063 & 0.130$\pm$0.094\\
+	\hline
+	50\% & 0.542$\pm$0.000 & 0.465$\pm$0.092 & 0.284$\pm$0.193 & 0.601$\pm$0.000 & 0.515$\pm$0.090 & 0.185$\pm$0.155\\
+	\hline
+	60\% & 0.542$\pm$0.000 & 0.452$\pm$0.104 & 0.256$\pm$0.112 & 0.601$\pm$0.000 & 0.497$\pm$0.101 & 0.191$\pm$0.148\\
+	\hline
+\end{tabular}
+\caption{Disk-based stability margins (cart pole).}
+\label{table:disk_margins_cart_pole:unc}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 0.739$\pm$0.000 & 0.739$\pm$0.001 & 0.513$\pm$0.008 & 0.678$\pm$0.000 & 0.677$\pm$0.002 & 0.338$\pm$0.003\\
+	\hline
+	10\% & 0.739$\pm$0.000 & 0.740$\pm$0.013 & 0.523$\pm$0.051 & 0.678$\pm$0.000 & 0.672$\pm$0.009 & 0.332$\pm$0.006\\
+	\hline
+	20\% & 0.739$\pm$0.000 & 0.739$\pm$0.027 & 0.533$\pm$0.082 & 0.678$\pm$0.000 & 0.651$\pm$0.068 & 0.318$\pm$0.020\\
+	\hline
+	30\% & 0.739$\pm$0.000 & 0.725$\pm$0.050 & 0.497$\pm$0.114 & 0.678$\pm$0.000 & 0.604$\pm$0.164 & 0.299$\pm$0.057\\
+	\hline
+	40\% & 0.739$\pm$0.000 & 0.715$\pm$0.066 & 0.483$\pm$0.115 & 0.678$\pm$0.000 & 0.627$\pm$0.120 & 0.291$\pm$0.072\\
+	\hline
+	50\% & 0.739$\pm$0.000 & 0.726$\pm$0.069 & 0.516$\pm$0.124 & 0.678$\pm$0.000 & 0.599$\pm$0.149 & 0.303$\pm$0.085\\
+	\hline
+	60\% & 0.739$\pm$0.000 & 0.713$\pm$0.108 & 0.485$\pm$0.105 & 0.678$\pm$0.000 & 0.551$\pm$0.209 & 0.282$\pm$0.108\\
+	\hline
+\end{tabular}
+\caption{Disk-based stability margins (robot arm).}
+\label{table:disk_margins_robot_arm:unc}
+\end{table}
+
+\section{Total Control Effort}
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 1.88 $\pm$ 0.00 & 1.88 $\pm$ 0.00 & 15.75 $\pm$ 9.02 & 4.69 $\pm$ 0.00 & 4.69 $\pm$ 0.00 & 110.38 $\pm$ 48.23\\
+	\hline
+	10\% & 1.88 $\pm$ 0.16 & 1.88 $\pm$ 0.16 & 14.75 $\pm$ 8.66 & 4.70 $\pm$ 0.37 & 4.73 $\pm$ 0.63 & 109.36 $\pm$ 49.25\\
+	\hline
+	20\% & 1.88 $\pm$ 0.31 & 1.87 $\pm$ 0.32 & 12.61 $\pm$ 7.74 & 4.71 $\pm$ 0.75 & 4.83 $\pm$ 1.30 & 101.82 $\pm$ 43.22\\
+	\hline
+	30\% & 1.89 $\pm$ 0.46 & 1.88 $\pm$ 0.46 & 12.45 $\pm$ 8.10 & 4.74 $\pm$ 1.08 & 4.80 $\pm$ 1.75 & 101.76 $\pm$ 46.54\\
+	\hline
+	40\% & 1.96 $\pm$ 0.65 & 1.87 $\pm$ 0.69 & 11.06 $\pm$ 8.18 & 4.89 $\pm$ 1.54 & 5.12 $\pm$ 2.79 & 110.95 $\pm$ 64.77\\
+	\hline
+	50\% & 1.87 $\pm$ 0.73 & 1.80 $\pm$ 0.77 & 9.68 $\pm$ 8.15 & 4.77 $\pm$ 1.71 & 4.71 $\pm$ 2.84 & 97.52 $\pm$ 54.93\\
+	\hline
+	60\% & 2.09 $\pm$ 0.92 & 1.95 $\pm$ 0.94 & 11.57 $\pm$ 9.29 & 5.26 $\pm$ 2.18 & 5.34 $\pm$ 3.81 & 116.20 $\pm$ 68.70\\
+	\hline
+\end{tabular}
+\caption{Integrated control effort (double integrator).}
+\label{table:control_effort_double_integrator:unc}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 3.81 $\pm$ 0.00 & 3.82 $\pm$ 0.00 & 2.17 $\pm$ 0.00 & 4.17 $\pm$ 0.00 & 4.17 $\pm$ 0.00 & 2.40 $\pm$ 0.00\\
+	\hline
+	10\% & 3.82 $\pm$ 0.02 & 3.82 $\pm$ 0.00 & 2.18 $\pm$ 0.07 & 4.18 $\pm$ 0.03 & 4.17 $\pm$ 0.01 & 2.39 $\pm$ 0.16\\
+	\hline
+	20\% & 3.83 $\pm$ 0.04 & 3.81 $\pm$ 0.01 & 2.21 $\pm$ 0.12 & 4.19 $\pm$ 0.07 & 4.17 $\pm$ 0.03 & 2.38 $\pm$ 0.29\\
+	\hline
+	30\% & 3.81 $\pm$ 0.03 & 3.80 $\pm$ 0.02 & 2.33 $\pm$ 0.22 & 4.16 $\pm$ 0.05 & 4.15 $\pm$ 0.04 & 2.46 $\pm$ 0.40\\
+	\hline
+	40\% & 3.83 $\pm$ 0.05 & 3.81 $\pm$ 0.01 & 2.33 $\pm$ 0.24 & 4.19 $\pm$ 0.08 & 4.15 $\pm$ 0.04 & 2.42 $\pm$ 0.38\\
+	\hline
+	50\% & 3.86 $\pm$ 0.09 & 3.79 $\pm$ 0.03 & 2.42 $\pm$ 0.27 & 4.21 $\pm$ 0.13 & 4.12 $\pm$ 0.06 & 2.50 $\pm$ 0.49\\
+	\hline
+	60\% & 3.84 $\pm$ 0.07 & 3.78 $\pm$ 0.03 & 2.45 $\pm$ 0.27 & 4.19 $\pm$ 0.09 & 4.11 $\pm$ 0.07 & 2.66 $\pm$ 0.52\\
+	\hline
+\end{tabular}
+\caption{Integrated control effort (cart pole).}
+\label{table:control_effort_cart_pole:unc}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 76.61 $\pm$ 0.00 & 75.44 $\pm$ 0.22 & 34.95 $\pm$ 1.11 & 86.80 $\pm$ 0.00 & 84.83 $\pm$ 0.25 & 121.01 $\pm$ 2.80\\
+	\hline
+	10\% & 79.07 $\pm$ 15.37 & 76.28 $\pm$ 7.56 & 37.19 $\pm$ 9.84 & 90.27 $\pm$ 19.94 & 87.26 $\pm$ 12.38 & 122.77 $\pm$ 14.64\\
+	\hline
+	20\% & 82.94 $\pm$ 30.52 & 77.03 $\pm$ 15.15 & 41.99 $\pm$ 20.30 & 96.08 $\pm$ 39.43 & 92.37 $\pm$ 29.10 & 126.49 $\pm$ 27.17\\
+	\hline
+	30\% & 78.33 $\pm$ 42.33 & 72.23 $\pm$ 22.83 & 40.13 $\pm$ 26.55 & 92.28 $\pm$ 53.09 & 80.45 $\pm$ 33.40 & 133.39 $\pm$ 34.85\\
+	\hline
+	40\% & 74.44 $\pm$ 46.04 & 70.90 $\pm$ 27.57 & 37.32 $\pm$ 27.24 & 84.29 $\pm$ 51.69 & 74.66 $\pm$ 33.62 & 137.27 $\pm$ 44.41\\
+	\hline
+	50\% & 93.78 $\pm$ 58.14 & 77.12 $\pm$ 30.20 & 45.92 $\pm$ 29.91 & 114.95 $\pm$ 73.98 & 85.06 $\pm$ 41.89 & 160.96 $\pm$ 63.56\\
+	\hline
+	60\% & 102.96 $\pm$ 76.36 & 81.13 $\pm$ 37.59 & 46.35 $\pm$ 32.39 & 129.40 $\pm$ 100.61 & 76.24 $\pm$ 42.32 & 162.74 $\pm$ 70.74\\
+	\hline
+\end{tabular}
+\caption{Integrated control effort (robot arm).}
+\label{table:control_effort_robot_arm:unc}
+\end{table}
+
+\subsection{Total LQ Cost}
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 26.99 $\pm$ 0.00 & 26.99 $\pm$ 0.00 & 47.97 $\pm$ 12.42 & 29.57 $\pm$ 0.00 & 29.57 $\pm$ 0.00 & 153.86 $\pm$ 52.15\\
+	\hline
+	10\% & 26.99 $\pm$ 0.36 & 26.99 $\pm$ 0.36 & 46.72 $\pm$ 11.97 & 29.58 $\pm$ 0.54 & 29.60 $\pm$ 0.67 & 154.40 $\pm$ 54.27\\
+	\hline
+	20\% & 27.00 $\pm$ 0.72 & 26.99 $\pm$ 0.72 & 43.72 $\pm$ 10.39 & 29.60 $\pm$ 1.08 & 29.68 $\pm$ 1.38 & 148.79 $\pm$ 49.61\\
+	\hline
+	30\% & 27.02 $\pm$ 1.06 & 26.99 $\pm$ 1.08 & 43.39 $\pm$ 10.61 & 29.64 $\pm$ 1.56 & 29.75 $\pm$ 2.06 & 147.08 $\pm$ 48.24\\
+	\hline
+	40\% & 27.15 $\pm$ 1.49 & 27.02 $\pm$ 1.57 & 40.82 $\pm$ 10.23 & 29.86 $\pm$ 2.22 & 29.88 $\pm$ 2.94 & 154.59 $\pm$ 59.26\\
+	\hline
+	50\% & 26.96 $\pm$ 1.69 & 26.87 $\pm$ 1.73 & 39.34 $\pm$ 10.56 & 29.71 $\pm$ 2.47 & 29.53 $\pm$ 3.14 & 139.88 $\pm$ 45.62\\
+	\hline
+	60\% & 27.47 $\pm$ 2.12 & 27.26 $\pm$ 2.16 & 41.82 $\pm$ 12.02 & 30.41 $\pm$ 3.14 & 30.04 $\pm$ 3.94 & 166.76 $\pm$ 64.04\\
+	\hline
+\end{tabular}
+\caption{Integrated LQ cost (double integrator).}
+\label{table:lq_cost_double_integrator:unc}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 114.68 $\pm$ 0.00 & 114.68 $\pm$ 0.00 & 128.41 $\pm$ 0.00 & 116.26 $\pm$ 0.00 & 116.26 $\pm$ 0.00 & 123.77 $\pm$ 0.00\\
+	\hline
+	10\% & 114.77 $\pm$ 0.25 & 114.76 $\pm$ 0.24 & 128.44 $\pm$ 1.70 & 116.36 $\pm$ 0.33 & 116.34 $\pm$ 0.25 & 124.21 $\pm$ 2.79\\
+	\hline
+	20\% & 114.96 $\pm$ 0.51 & 114.98 $\pm$ 0.52 & 128.03 $\pm$ 2.57 & 116.57 $\pm$ 0.64 & 116.56 $\pm$ 0.54 & 125.45 $\pm$ 5.86\\
+	\hline
+	30\% & 115.10 $\pm$ 0.66 & 115.06 $\pm$ 0.60 & 126.79 $\pm$ 2.90 & 116.70 $\pm$ 0.76 & 116.63 $\pm$ 0.62 & 124.67 $\pm$ 7.26\\
+	\hline
+	40\% & 115.16 $\pm$ 0.76 & 115.16 $\pm$ 0.74 & 127.33 $\pm$ 3.11 & 116.83 $\pm$ 0.98 & 116.71 $\pm$ 0.74 & 126.49 $\pm$ 8.35\\
+	\hline
+	50\% & 115.89 $\pm$ 1.58 & 115.95 $\pm$ 1.69 & 126.53 $\pm$ 3.00 & 117.70 $\pm$ 1.97 & 117.56 $\pm$ 1.75 & 126.87 $\pm$ 9.79\\
+	\hline
+	60\% & 116.03 $\pm$ 1.80 & 116.00 $\pm$ 1.70 & 126.04 $\pm$ 3.09 & 117.84 $\pm$ 2.19 & 117.61 $\pm$ 1.77 & 124.38 $\pm$ 8.41\\
+	\hline
+\end{tabular}
+\caption{Integrated LQ cost (cart pole).}
+\label{table:lq_cost_cart_pole:unc}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 335.60 $\pm$ 0.00 & 335.64 $\pm$ 0.01 & 417.17 $\pm$ 4.71 & 342.49 $\pm$ 0.00 & 341.91 $\pm$ 0.02 & 387.85 $\pm$ 2.08\\
+	\hline
+	10\% & 339.94 $\pm$ 28.23 & 338.91 $\pm$ 28.09 & 418.91 $\pm$ 10.36 & 347.33 $\pm$ 29.47 & 347.57 $\pm$ 33.84 & 391.60 $\pm$ 28.38\\
+	\hline
+	20\% & 346.55 $\pm$ 56.39 & 342.30 $\pm$ 56.11 & 419.03 $\pm$ 20.77 & 355.12 $\pm$ 58.53 & 360.32 $\pm$ 79.00 & 397.19 $\pm$ 56.13\\
+	\hline
+	30\% & 336.34 $\pm$ 80.15 & 325.00 $\pm$ 85.48 & 424.42 $\pm$ 36.56 & 347.17 $\pm$ 80.65 & 329.89 $\pm$ 103.45 & 407.91 $\pm$ 75.30\\
+	\hline
+	40\% & 330.51 $\pm$ 90.91 & 319.76 $\pm$ 104.17 & 416.32 $\pm$ 32.56 & 341.00 $\pm$ 87.72 & 305.03 $\pm$ 96.49 & 430.19 $\pm$ 108.48\\
+	\hline
+	50\% & 363.20 $\pm$ 111.39 & 343.33 $\pm$ 113.85 & 426.17 $\pm$ 39.39 & 383.69 $\pm$ 118.70 & 332.32 $\pm$ 116.36 & 451.09 $\pm$ 102.98\\
+	\hline
+	60\% & 380.89 $\pm$ 144.93 & 358.82 $\pm$ 143.73 & 417.05 $\pm$ 69.46 & 399.82 $\pm$ 148.86 & 312.17 $\pm$ 124.53 & 466.80 $\pm$ 144.12\\
+	\hline
+\end{tabular}
+\caption{Integrated LQ cost (robot arm).}
+\label{table:lq_cost_robot_arm:unc}
+\end{table}
+
+% ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- %
+
+\chapter{Measurement Noise}
+\label{appendix:testResultsNoise}
+\section{Percentage of Stable Controllers}
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	 0\% & 100 & 87 & 99 & 100 & 96 & 96 \\
+	\hline
+	10\% & 99 & 88 & 79 & 98 & 80 & 95\\
+	\hline
+	20\% & 97 & 76 & 84 & 96 & 73 & 85\\
+	\hline
+	30\% & 100 & 62 & 89 & 100 & 67 & 73\\
+	\hline
+	40\% & 100 & 51 & 84 & 99 & 51 & 66\\
+	\hline
+	50\% & 100 & 56 & 80 & 99 & 53 & 79\\
+	\hline
+	60\% & 100 & 52 & 82 & 97 & 52 & 85\\
+	\hline
+\end{tabular}
+\caption{Percentage of stable controllers (double integrator).}
+\label{table:percent_stable_double_integrator:noise}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	 0\% & 100 & 100 & 100 & 100 & 100 & 100 \\
+	\hline
+	10\% & 100 & 98 & 88 & 97 & 100 & 97\\
+	\hline
+	20\% & 99 & 99 & 13 & 99 & 96 & 56\\
+	\hline
+	30\% & 100 & 99 & 75 & 99 & 96 & 25\\
+	\hline
+	40\% & 100 & 96 & 92 & 98 & 94 & 53\\
+	\hline
+	50\% & 94 & 98 & 96 & 98 & 93 & 69\\
+	\hline
+	60\% & 100 & 99 & 89 & 100 & 94 & 79\\
+	\hline
+\end{tabular}
+\caption{Percentage of stable controllers (cart pole).}
+\label{table:percent_stable_cart_pole:noise}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	 0\% & 100 & 98 & 98 & 100 & 94 & 96 \\
+	\hline
+	10\% & 99 & 73 & 32 & 100 & 77 & 99\\
+	\hline
+	20\% & 100 & 68 & 1 & 99 & 70 & 100\\
+	\hline
+	30\% & 100 & 55 & 0 & 100 & 57 & 83\\
+	\hline
+	40\% & 100 & 52 & 0 & 100 & 51 & 42\\
+	\hline
+	50\% & 100 & 41 & 0 & 99 & 42 & 0\\
+	\hline
+	60\% & 99 & 37 & 0 & 98 & 40 & 0\\
+	\hline
+\end{tabular}
+\caption{Percentage of stable controllers (robot arm).}
+\label{table:percent_stable_robot_arm:noise}
+\end{table}
+
+\subsection{$\mathcal{H}_{\infty}$ Norms}
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 4.629$\pm$0.000 & 4.629$\pm$0.000 & 1.837$\pm$0.670 & 2.565$\pm$0.000 & 2.565$\pm$0.000 & 1.034$\pm$0.766\\
+	\hline
+	10\% & 4.629$\pm$0.000 & 7.878$\pm$2.363 & 8.430$\pm$1.657 & 2.565$\pm$0.000 & 5.926$\pm$2.385 & 0.987$\pm$0.427\\
+	\hline
+	20\% & 4.629$\pm$0.000 & 13.988$\pm$4.208 & 8.107$\pm$2.262 & 2.565$\pm$0.000 & 12.473$\pm$4.104 & 1.546$\pm$0.814\\
+	\hline
+	30\% & 4.629$\pm$0.000 & 19.068$\pm$4.853 & 9.267$\pm$2.808 & 2.565$\pm$0.000 & 18.337$\pm$4.890 & 5.393$\pm$3.391\\
+	\hline
+	40\% & 4.629$\pm$0.000 & 19.601$\pm$4.474 & 10.000$\pm$3.929 & 2.565$\pm$0.000 & 18.965$\pm$4.273 & 7.369$\pm$3.648\\
+	\hline
+	50\% & 4.629$\pm$0.000 & 19.902$\pm$6.001 & 9.352$\pm$4.033 & 2.565$\pm$0.000 & 19.625$\pm$6.056 & 7.406$\pm$3.780\\
+	\hline
+	60\% & 4.629$\pm$0.000 & 18.641$\pm$4.572 & 7.136$\pm$1.959 & 2.565$\pm$0.000 & 18.319$\pm$4.493 & 5.140$\pm$2.400\\
+	\hline
+\end{tabular}
+\caption{$\mathcal{H}_{\infty}$ norms of generalized plant (double integrator).}
+\label{table:hinfinity_norms_double_integrator:noise}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 3.829$\pm$0.000 & 3.826$\pm$0.000 & 6.414$\pm$0.000 & 2.250$\pm$0.000 & 2.253$\pm$0.000 & 7.195$\pm$0.000\\
+	\hline
+	10\% & 3.829$\pm$0.000 & 3.943$\pm$0.079 & 12.242$\pm$1.858 & 2.250$\pm$0.000 & 2.484$\pm$0.095 & 12.633$\pm$1.321\\
+	\hline
+	20\% & 3.829$\pm$0.000 & 4.143$\pm$0.205 & 10.606$\pm$0.296 & 2.250$\pm$0.000 & 2.735$\pm$0.191 & 24.046$\pm$4.962\\
+	\hline
+	30\% & 3.829$\pm$0.000 & 4.147$\pm$0.349 & 11.172$\pm$2.672 & 2.250$\pm$0.000 & 2.743$\pm$0.281 & 30.912$\pm$5.428\\
+	\hline
+	40\% & 3.829$\pm$0.000 & 4.013$\pm$0.346 & 9.318$\pm$0.915 & 2.250$\pm$0.000 & 2.643$\pm$0.257 & 24.764$\pm$4.646\\
+	\hline
+	50\% & 3.829$\pm$0.000 & 3.717$\pm$0.360 & 10.022$\pm$0.988 & 2.250$\pm$0.000 & 2.444$\pm$0.241 & 22.208$\pm$4.611\\
+	\hline
+	60\% & 3.829$\pm$0.000 & 3.489$\pm$0.534 & 10.066$\pm$1.028 & 2.250$\pm$0.000 & 2.440$\pm$0.333 & 19.583$\pm$3.525\\
+	\hline
+\end{tabular}
+\caption{$\mathcal{H}_{\infty}$ norms of generalized plant (cart pole).}
+\label{table:hinfinity_norms_cart_pole:noise}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 3.853$\pm$0.000 & 3.857$\pm$0.010 & 14.026$\pm$0.307 & 2.259$\pm$0.000 & 2.270$\pm$0.001 & 2.618$\pm$0.030\\
+	\hline
+	10\% & 3.853$\pm$0.000 & 5.010$\pm$1.275 & 32.992$\pm$4.248 & 2.259$\pm$0.000 & 3.576$\pm$1.225 & 3.120$\pm$0.127\\
+	\hline
+	20\% & 3.853$\pm$0.000 & 5.552$\pm$1.392 & 44.931$\pm$0.000 & 2.259$\pm$0.000 & 4.500$\pm$1.679 & 2.624$\pm$0.195\\
+	\hline
+	30\% & 3.853$\pm$0.000 & 6.381$\pm$2.007 & - & 2.259$\pm$0.000 & 5.292$\pm$1.955 & 2.686$\pm$0.313\\
+	\hline
+	40\% & 3.853$\pm$0.000 & 8.085$\pm$2.696 & - & 2.259$\pm$0.000 & 6.619$\pm$2.384 & 8.118$\pm$3.779\\
+	\hline
+	50\% & 3.853$\pm$0.000 & 8.630$\pm$3.056 & - & 2.259$\pm$0.000 & 7.792$\pm$3.192 & -\\
+	\hline
+	60\% & 3.853$\pm$0.000 & 9.121$\pm$3.642 & - & 2.259$\pm$0.000 & 8.536$\pm$3.888 & -\\
+	\hline
+\end{tabular}
+\caption{$\mathcal{H}_{\infty}$ norms of generalized plant (robot arm).}
+\label{table:hinfinity_norms_robot_arm:noise}
+\end{table}
+
+\section{Disk-Based Stability Margins}
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 1.183$\pm$0.000 & 1.183$\pm$0.000 & 0.913$\pm$0.066 & 1.119$\pm$0.000 & 1.119$\pm$0.000 & 0.888$\pm$0.109\\
+	\hline
+	10\% & 1.183$\pm$0.000 & 1.297$\pm$0.077 & 1.191$\pm$0.121 & 1.119$\pm$0.000 & 1.255$\pm$0.091 & 0.974$\pm$0.078\\
+	\hline
+	20\% & 1.183$\pm$0.000 & 1.419$\pm$0.067 & 1.299$\pm$0.099 & 1.119$\pm$0.000 & 1.402$\pm$0.072 & 1.079$\pm$0.117\\
+	\hline
+	30\% & 1.183$\pm$0.000 & 1.471$\pm$0.046 & 1.278$\pm$0.163 & 1.119$\pm$0.000 & 1.465$\pm$0.047 & 1.237$\pm$0.105\\
+	\hline
+	40\% & 1.183$\pm$0.000 & 1.477$\pm$0.052 & 1.102$\pm$0.270 & 1.119$\pm$0.000 & 1.473$\pm$0.049 & 1.281$\pm$0.110\\
+	\hline
+	50\% & 1.183$\pm$0.000 & 1.467$\pm$0.078 & 1.049$\pm$0.247 & 1.119$\pm$0.000 & 1.465$\pm$0.075 & 1.277$\pm$0.118\\
+	\hline
+	60\% & 1.183$\pm$0.000 & 1.449$\pm$0.078 & 1.075$\pm$0.169 & 1.119$\pm$0.000 & 1.449$\pm$0.075 & 1.214$\pm$0.145\\
+	\hline
+\end{tabular}
+\caption{Disk-based stability margins (double integrator).}
+\label{table:disk_margins_double_integrator:noise}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 0.542$\pm$0.000 & 0.541$\pm$0.000 & 0.163$\pm$0.000 & 0.601$\pm$0.000 & 0.600$\pm$0.000 & 0.105$\pm$0.000\\
+	\hline
+	10\% & 0.542$\pm$0.000 & 0.542$\pm$0.004 & 0.055$\pm$0.036 & 0.601$\pm$0.000 & 0.618$\pm$0.007 & 0.109$\pm$0.004\\
+	\hline
+	20\% & 0.542$\pm$0.000 & 0.543$\pm$0.011 & 0.103$\pm$0.017 & 0.601$\pm$0.000 & 0.641$\pm$0.012 & 0.137$\pm$0.005\\
+	\hline
+	30\% & 0.542$\pm$0.000 & 0.546$\pm$0.018 & 0.124$\pm$0.056 & 0.601$\pm$0.000 & 0.659$\pm$0.021 & 0.142$\pm$0.008\\
+	\hline
+	40\% & 0.542$\pm$0.000 & 0.551$\pm$0.021 & 0.059$\pm$0.023 & 0.601$\pm$0.000 & 0.677$\pm$0.029 & 0.128$\pm$0.009\\
+	\hline
+	50\% & 0.542$\pm$0.000 & 0.547$\pm$0.024 & 0.071$\pm$0.031 & 0.601$\pm$0.000 & 0.696$\pm$0.030 & 0.126$\pm$0.010\\
+	\hline
+	60\% & 0.542$\pm$0.000 & 0.522$\pm$0.036 & 0.042$\pm$0.017 & 0.601$\pm$0.000 & 0.687$\pm$0.048 & 0.130$\pm$0.010\\
+	\hline
+\end{tabular}
+\caption{Disk-based stability margins (cart pole).}
+\label{table:disk_margins_cart_pole:noise}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 0.739$\pm$0.000 & 0.740$\pm$0.002 & 0.514$\pm$0.007 & 0.678$\pm$0.000 & 0.678$\pm$0.002 & 0.338$\pm$0.003\\
+	\hline
+	10\% & 0.739$\pm$0.000 & 0.699$\pm$0.055 & 0.783$\pm$0.057 & 0.678$\pm$0.000 & 0.628$\pm$0.072 & 0.439$\pm$0.013\\
+	\hline
+	20\% & 0.739$\pm$0.000 & 0.706$\pm$0.062 & 0.824$\pm$0.000 & 0.678$\pm$0.000 & 0.658$\pm$0.080 & 0.503$\pm$0.032\\
+	\hline
+	30\% & 0.739$\pm$0.000 & 0.652$\pm$0.144 & - & 0.678$\pm$0.000 & 0.633$\pm$0.155 & 0.382$\pm$0.017\\
+	\hline
+	40\% & 0.739$\pm$0.000 & 0.624$\pm$0.158 & - & 0.678$\pm$0.000 & 0.622$\pm$0.153 & 0.286$\pm$0.017\\
+	\hline
+	50\% & 0.739$\pm$0.000 & 0.546$\pm$0.201 & - & 0.678$\pm$0.000 & 0.561$\pm$0.200 & -\\
+	\hline
+	60\% & 0.739$\pm$0.000 & 0.519$\pm$0.226 & - & 0.678$\pm$0.000 & 0.529$\pm$0.230 & -\\
+	\hline
+\end{tabular}
+\caption{Disk-based stability margins (robot arm).}
+\label{table:disk_margins_robot_arm:noise}
+\end{table}
+
+\section{Total Control Effort}
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 1.88 $\pm$ 0.00 & 1.88 $\pm$ 0.00 & 14.70 $\pm$ 9.27 & 4.69 $\pm$ 0.00 & 4.69 $\pm$ 0.00 & 113.64 $\pm$ 49.23\\
+	\hline
+	10\% & 1.95 $\pm$ 0.02 & 0.87 $\pm$ 0.51 & 0.55 $\pm$ 0.27 & 4.85 $\pm$ 0.05 & 1.64 $\pm$ 1.10 & 36.72 $\pm$ 13.79\\
+	\hline
+	20\% & 2.18 $\pm$ 0.05 & 0.30 $\pm$ 0.16 & 0.92 $\pm$ 0.51 & 5.30 $\pm$ 0.14 & 0.39 $\pm$ 0.23 & 13.78 $\pm$ 7.97\\
+	\hline
+	30\% & 2.54 $\pm$ 0.08 & 0.30 $\pm$ 0.08 & 0.93 $\pm$ 0.47 & 6.06 $\pm$ 0.21 & 0.36 $\pm$ 0.11 & 4.19 $\pm$ 2.81\\
+	\hline
+	40\% & 3.09 $\pm$ 0.13 & 0.45 $\pm$ 0.10 & 0.89 $\pm$ 0.61 & 7.07 $\pm$ 0.26 & 0.51 $\pm$ 0.11 & 3.34 $\pm$ 1.48\\
+	\hline
+	50\% & 3.78 $\pm$ 0.21 & 0.61 $\pm$ 0.20 & 1.03 $\pm$ 0.78 & 8.56 $\pm$ 0.47 & 0.64 $\pm$ 0.17 & 4.32 $\pm$ 2.04\\
+	\hline
+	60\% & 4.54 $\pm$ 0.24 & 0.77 $\pm$ 0.28 & 1.57 $\pm$ 0.66 & 10.10 $\pm$ 0.51 & 0.83 $\pm$ 0.30 & 6.33 $\pm$ 2.38\\
+	\hline
+\end{tabular}
+\caption{Integrated control effort (double integrator).}
+\label{table:control_effort_double_integrator:noise}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 3.81 $\pm$ 0.00 & 3.82 $\pm$ 0.00 & 2.17 $\pm$ 0.00 & 4.17 $\pm$ 0.00 & 4.17 $\pm$ 0.00 & 2.40 $\pm$ 0.00\\
+	\hline
+	10\% & 4.14 $\pm$ 0.08 & 4.03 $\pm$ 0.09 & 2.37 $\pm$ 0.32 & 5.22 $\pm$ 0.14 & 4.71 $\pm$ 0.18 & 2.78 $\pm$ 0.08\\
+	\hline
+	20\% & 5.12 $\pm$ 0.23 & 4.74 $\pm$ 0.19 & 2.40 $\pm$ 0.13 & 8.25 $\pm$ 0.59 & 5.86 $\pm$ 0.44 & 3.80 $\pm$ 0.15\\
+	\hline
+	30\% & 6.75 $\pm$ 0.38 & 5.74 $\pm$ 0.38 & 3.95 $\pm$ 0.76 & 13.43 $\pm$ 1.03 & 7.80 $\pm$ 0.80 & 4.35 $\pm$ 0.18\\
+	\hline
+	40\% & 9.05 $\pm$ 0.62 & 7.07 $\pm$ 0.57 & 6.05 $\pm$ 1.55 & 21.36 $\pm$ 2.19 & 9.66 $\pm$ 1.06 & 4.24 $\pm$ 0.27\\
+	\hline
+	50\% & 11.79 $\pm$ 0.75 & 8.61 $\pm$ 0.82 & 7.80 $\pm$ 3.38 & 29.88 $\pm$ 2.89 & 12.41 $\pm$ 1.43 & 4.41 $\pm$ 0.35\\
+	\hline
+	60\% & 15.63 $\pm$ 1.63 & 10.69 $\pm$ 1.12 & 4.27 $\pm$ 1.38 & 42.02 $\pm$ 4.71 & 15.05 $\pm$ 1.74 & 4.55 $\pm$ 0.41\\
+	\hline
+\end{tabular}
+\caption{Integrated control effort (cart pole).}
+\label{table:control_effort_cart_pole:noise}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 76.61 $\pm$ 0.00 & 75.49 $\pm$ 0.27 & 35.13 $\pm$ 1.00 & 86.80 $\pm$ 0.00 & 84.88 $\pm$ 0.30 & 121.48 $\pm$ 2.52\\
+	\hline
+	10\% & 76.69 $\pm$ 0.13 & 66.21 $\pm$ 35.53 & 12.76 $\pm$ 1.22 & 86.91 $\pm$ 0.19 & 69.97 $\pm$ 34.21 & 83.10 $\pm$ 4.76\\
+	\hline
+	20\% & 76.88 $\pm$ 0.27 & 90.21 $\pm$ 29.93 & 16.46 $\pm$ 0.00 & 87.13 $\pm$ 0.37 & 84.98 $\pm$ 32.50 & 153.10 $\pm$ 25.19\\
+	\hline
+	30\% & 77.11 $\pm$ 0.44 & 92.55 $\pm$ 29.07 & - & 87.56 $\pm$ 0.50 & 82.62 $\pm$ 33.99 & 232.95 $\pm$ 17.53\\
+	\hline
+	40\% & 77.64 $\pm$ 0.55 & 83.43 $\pm$ 33.83 & - & 88.22 $\pm$ 0.66 & 79.21 $\pm$ 31.69 & 338.00 $\pm$ 26.63\\
+	\hline
+	50\% & 78.12 $\pm$ 0.77 & 98.64 $\pm$ 18.57 & - & 89.08 $\pm$ 0.87 & 91.72 $\pm$ 17.56 & -\\
+	\hline
+	60\% & 78.69 $\pm$ 0.80 & 84.27 $\pm$ 27.84 & - & 90.03 $\pm$ 1.07 & 77.31 $\pm$ 31.80 & -\\
+	\hline
+\end{tabular}
+\caption{Integrated control effort (robot arm).}
+\label{table:control_effort_robot_arm:noise}
+\end{table}
+
+\section{Total LQ Cost}
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 26.99 $\pm$ 0.00 & 26.99 $\pm$ 0.00 & 46.17 $\pm$ 12.38 & 29.57 $\pm$ 0.00 & 29.57 $\pm$ 0.00 & 155.40 $\pm$ 51.26\\
+	\hline
+	10\% & 27.07 $\pm$ 0.01 & 30.77 $\pm$ 3.90 & 30.79 $\pm$ 2.26 & 29.74 $\pm$ 0.06 & 28.56 $\pm$ 1.71 & 72.90 $\pm$ 19.09\\
+	\hline
+	20\% & 27.32 $\pm$ 0.03 & 57.66 $\pm$ 26.63 & 31.79 $\pm$ 4.35 & 30.25 $\pm$ 0.13 & 48.56 $\pm$ 18.86 & 43.09 $\pm$ 11.19\\
+	\hline
+	30\% & 27.73 $\pm$ 0.05 & 99.72 $\pm$ 51.83 & 34.62 $\pm$ 6.72 & 31.07 $\pm$ 0.23 & 94.01 $\pm$ 49.32 & 34.52 $\pm$ 5.25\\
+	\hline
+	40\% & 28.34 $\pm$ 0.11 & 104.14 $\pm$ 52.56 & 36.03 $\pm$ 8.06 & 32.19 $\pm$ 0.29 & 102.90 $\pm$ 54.36 & 33.73 $\pm$ 4.67\\
+	\hline
+	50\% & 29.10 $\pm$ 0.17 & 111.75 $\pm$ 63.26 & 34.58 $\pm$ 6.32 & 33.81 $\pm$ 0.46 & 106.55 $\pm$ 58.98 & 35.91 $\pm$ 6.12\\
+	\hline
+	60\% & 30.00 $\pm$ 0.24 & 81.42 $\pm$ 34.90 & 30.42 $\pm$ 1.73 & 35.45 $\pm$ 0.52 & 82.96 $\pm$ 37.72 & 33.91 $\pm$ 2.95\\
+	\hline
+\end{tabular}
+\caption{Integrated LQ cost (double integrator).}
+\label{table:lq_cost_double_integrator:noise}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 114.68 $\pm$ 0.00 & 114.68 $\pm$ 0.00 & 128.41 $\pm$ 0.00 & 116.26 $\pm$ 0.00 & 116.26 $\pm$ 0.00 & 123.77 $\pm$ 0.00\\
+	\hline
+	10\% & 117.78 $\pm$ 0.31 & 118.10 $\pm$ 0.41 & 207.44 $\pm$ 38.97 & 125.98 $\pm$ 0.99 & 123.96 $\pm$ 1.07 & 122.39 $\pm$ 1.79\\
+	\hline
+	20\% & 127.00 $\pm$ 1.23 & 129.24 $\pm$ 1.72 & 135.44 $\pm$ 4.62 & 154.79 $\pm$ 4.29 & 150.75 $\pm$ 4.49 & 124.00 $\pm$ 4.76\\
+	\hline
+	30\% & 142.74 $\pm$ 2.53 & 147.37 $\pm$ 4.79 & 124.27 $\pm$ 4.61 & 203.07 $\pm$ 8.36 & 199.99 $\pm$ 16.43 & 123.62 $\pm$ 3.14\\
+	\hline
+	40\% & 164.53 $\pm$ 4.44 & 172.09 $\pm$ 8.45 & 149.24 $\pm$ 19.80 & 273.50 $\pm$ 15.28 & 263.93 $\pm$ 32.32 & 126.44 $\pm$ 3.85\\
+	\hline
+	50\% & 191.46 $\pm$ 6.61 & 198.09 $\pm$ 12.44 & 174.35 $\pm$ 33.83 & 355.80 $\pm$ 21.55 & 334.52 $\pm$ 48.65 & 139.04 $\pm$ 11.13\\
+	\hline
+	60\% & 227.09 $\pm$ 10.77 & 231.75 $\pm$ 17.27 & 155.45 $\pm$ 19.11 & 467.05 $\pm$ 32.73 & 394.12 $\pm$ 62.69 & 156.47 $\pm$ 21.17\\
+	\hline
+\end{tabular}
+\caption{Integrated LQ cost (cart pole).}
+\label{table:lq_cost_cart_pole:noise}
+\end{table}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabular}{| c || c | c | c | c | c | c |}
+	\hline
+	 & \multicolumn{3}{c|}{$\mathcal{H}_{2}$} & \multicolumn{2}{c|}{$\mathcal{H}_{\infty}$} & Lyapunov\\
+	\hline
+	SF$\times$100 & C1& C2 & C3 & C4 & C5 & C6\\
+	\hline\hline
+	0\% & 335.60 $\pm$ 0.00 & 335.64 $\pm$ 0.01 & 416.45 $\pm$ 4.41 & 342.49 $\pm$ 0.00 & 341.90 $\pm$ 0.02 & 387.79 $\pm$ 2.06\\
+	\hline
+	10\% & 335.66 $\pm$ 0.01 & 372.42 $\pm$ 39.62 & 897.58 $\pm$ 155.92 & 342.59 $\pm$ 0.08 & 376.02 $\pm$ 39.49 & 355.17 $\pm$ 1.87\\
+	\hline
+	20\% & 335.86 $\pm$ 0.02 & 393.77 $\pm$ 51.12 & 1083.33 $\pm$ 0.00 & 342.83 $\pm$ 0.13 & 396.29 $\pm$ 52.65 & 418.84 $\pm$ 26.86\\
+	\hline
+	30\% & 336.18 $\pm$ 0.04 & 418.30 $\pm$ 64.02 & - & 343.27 $\pm$ 0.24 & 427.11 $\pm$ 79.06 & 531.92 $\pm$ 23.51\\
+	\hline
+	40\% & 336.63 $\pm$ 0.07 & 495.60 $\pm$ 126.66 & - & 343.96 $\pm$ 0.31 & 486.31 $\pm$ 121.61 & 734.37 $\pm$ 56.01\\
+	\hline
+	50\% & 337.21 $\pm$ 0.11 & 506.23 $\pm$ 166.97 & - & 344.81 $\pm$ 0.51 & 519.08 $\pm$ 183.06 & -\\
+	\hline
+	60\% & 337.90 $\pm$ 0.16 & 527.10 $\pm$ 166.28 & - & 345.83 $\pm$ 0.58 & 541.34 $\pm$ 200.56 & -\\
+	\hline
+\end{tabular}
+\caption{Integrated LQ cost (robot arm).}
+\label{table:lq_cost_robot_arm:noise}
+\end{table}

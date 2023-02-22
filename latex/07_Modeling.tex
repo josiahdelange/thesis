@@ -1,0 +1,651 @@
+\chapter{Modeling and Simulation}
+\label{chap:model}
+This chapter describes the mathematical modeling of case study dynamical systems used to evaluate data-driven control.  The case studies are well-known examples from introductory controls courses which fit neatly within the modeling framework typically used for robotics \cite{sciavicco2001modelling, spong2008robot,slotineli}.  However, it should be emphasized that this is not a thesis on robot control - rather, case studies were chosen which have increasingly nonlinear dynamics, in order to more effectively simulate the type of time-correlated uncertainty arising from linearization error.  This framework allows nonlinear plant models to be derived easily using Lagrangian dynamics (see Appendix \ref{appendix:modeling} for full derivations) and linearization to be performed analytically.  For each case study, all states are defined as relative to a static equilibrium which the control maintains using a linearized representation of the system.
+
+\section{Manipulator Equation and Lagrangian Dynamics}
+The nonlinear dynamic equations for the rigid-body motion of an $m$-link robotic manipulator take the form of $m$ coupled differential equations, expressed in matrix form as
+\begin{equation}
+\label{manipulator_eqn}
+\begin{aligned}
+	\vb*{M(q)\ddot{q} + C(q, \dot{q})\dot{q}} &= \vb*{g}(\vb*{q}) + \vb*{\tau}
+\end{aligned}
+\end{equation}
+where $\vb*{q} \in \mathbb{R}^{m}$ is a vector of generalized position coordinates, $\vb*{M(q)} \in \mathbb{R}^{m \times m}$ is a symmetric, positive-definite mass/inertia matrix, the terms $\vb*{C(q, \dot{q})\dot{q}}$ account for centrifugal/Coriolis effects, and the $\vb*{g(q)}$ term accounts for static effects.  The system's input is $\vb*{\tau} \in \mathbb{R}^{m}$.  For a given system, nonlinear motion equations are derived by applying the Lagrange equation
+\begin{equation}
+\label{lagrange_eqn}
+\begin{aligned}
+	\frac{d}{dt} \bigg{(} \frac{\partial L}{\partial \vb*{\dot{q}} } \bigg{)} - \frac{\partial L}{\partial \vb*{q}} = \vb*{\tau}
+\end{aligned}
+\end{equation}
+to each degree of freedom in $\vb*{q}$.  Equation \eqref{manipulator_eqn} is then constructed by grouping terms.  In Equation \eqref{lagrange_eqn}, the Lagrangian $L = K - U$ is the difference between kinetic energy $K$ and potential energy $U$.
+
+\subsection{Nonlinear Simulation}
+Systems described by Equation \eqref{manipulator_eqn} can be simulated using the ordinary differential equation (ODE)
+\begin{equation}
+\label{manipulator_ode}
+\begin{aligned}
+	\ddot{\vb*{q}} &= -\vb*{M}(\vb*{q})^{-1}\big{(}\vb{C}(\vb*{q}, \dot{\vb*{q}})\dot{\vb*{q}} - \vb*{g}(\vb*{q}) - \vb*{\tau}\big{)}
+\end{aligned}
+\end{equation}
+and by defining the state vector $\vb*{x}(t) = \begin{bmatrix} \vb*{q}(t), & \vb*{\dot{q}}(t) \end{bmatrix}^{T}$ and controlled input vector such that $\vb*{\tau}(t) = \vb*{B}_{\tau}\vb*{u}(t)$, Equation \eqref{manipulator_ode} can simulated using nonlinear plant model
+\begin{equation}
+\label{nonlinear_plant}
+\begin{aligned}
+	\dot{\vb*{x}}(t) = \vb*{f}(\vb*{x}(t), \vb*{u}(t)) =
+	\begin{bmatrix}
+		\vb*{\dot{q}}(t)\\
+		-\vb*{M(q)^{-1}\big{(} C(q, \dot{q})\dot{q}} - \vb*{g}(\vb*{q}) - \vb*{B}_{\tau}\vb*{u}(t) \big{)}\\
+	\end{bmatrix}
+\end{aligned}
+\end{equation}
+
+For nonlinear simulation, Equation \eqref{nonlinear_plant} is propagated forward using a fixed-rate ODE solver from a given initial state $\vb*{x}_{0}$ and input $\vb*{u}_{0}$.  Its output, sampled at a pre-configured rate, is then subjected to additive zero-mean Gaussian noise.
+
+\subsection{Linearization for Control Design}
+For stability analysis, linearization of Equation \eqref{nonlinear_plant} is taken about a fixed point where $\vb*{q} = 0$ and $\vb*{\dot{q}} = 0$ and small angle approximations are assumed.  This results in the following continuous-time state-space model
+\begin{equation}
+\label{fixed_point_linearization1}
+\begin{aligned}
+	\dot{\vb*{x}}(t) &\approx
+	\underbrace{
+	\begin{bmatrix}
+		\vb*{0} & \vb*{I}\\
+		-\vb*{M}^{-1} \frac{\partial \vb*{g}(\vb*{q})}{\partial \vb*{q}} & \vb*{0}\\
+	\end{bmatrix}}_{\text{\normalsize $\vb*{A}_{c}$}}
+	\vb*{x}(t)
+	 + 
+	\underbrace{
+	\begin{bmatrix}
+		\vb*{0}\\
+		\vb*{M}^{-1}\vb*{B}_{\tau}\\
+	\end{bmatrix}}_{\text{\normalsize $\vb*{B}_{c}$}}
+	\vb*{u}(t)
+	 + 
+	 \vb*{\Delta}(t)
+\end{aligned}
+\end{equation}
+where $\vb*{\Delta}(t)$ is a disturbance term representing parameter uncertainty and nonlinearities.
+
+\subsection{Disturbance Modeling}
+\label{sect:disturbance_modeling}
+Classical small-gain approaches to robust control treat $\vb*{\Delta}$ as a stable, norm-bounded transfer function which is to be tolerated and stabilized by choice of an appropriately-chosen norm-bound $\gamma$.  However, without accurate disturbance models it is well-known that this approach can produce overly conservative control designs.
+
+Other approaches may instead utilize specific \emph{a priori} knowledge of the structure of the plant dynamics and which specific parameters (or exogenous inputs) are expected to change unpredictably.  These allow the algebraic separation of known terms and uncertain terms in the plant model, to derive an approximate expression for $\vb*{\Delta}(t)$ which is amenable to control design.  Ideally, this is linearly maps a norm-bounded disturbance input $\vb*{w}(t)$.
+
+The approach taken in this work will utilize some structure of Equation \eqref{fixed_point_linearization}, but will not assume any specific knowledge of the internal plant structure.  This is done to evaluate the data-driven control in a context that is closer to ``model-free'' context, although not completely so due to the assumption of a known disturbance input mapping matrix $\vb*{D}$.  The data-driven control approaches evaluated in this work could be interpreted as a fine-tuning or further optimization of a partially-uncertain model.  Incorporating model knowledge into robust data-driven control and determining how best to utilize the training data is a topic with many subtle complexities, and is decidedly out of scope for the analyses considered here.
+
+\subsubsection{Continuous-Time Disturbances}
+The structure of Equation \eqref{fixed_point_linearization1} implies that continuous-time disturbances primarily affect the ``lower block'' (dynamic) portion of the model, since the ``upper block'' is just kinematics.  Thus, 
+\begin{equation}
+\label{eq-continuous-disturbances}
+\begin{aligned}
+	 \vb*{\Delta}(t) &\approx
+	\begin{bmatrix}
+		\vb*{0}\\
+		\vb*{\Delta}_{l}\\
+	\end{bmatrix} \vb*{w}(t)
+	= \vb*{D}_{c} \vb*{w}(t)
+\end{aligned}
+\end{equation}
+and for simplicity, the matrix $\vb*{\Delta}_{l}$ is taken to be $\vb*{I}$.  With this assumption, the continuous-time linear dynamics are
+\begin{equation}
+\label{fixed_point_linearization}
+\begin{aligned}
+	\dot{\vb*{x}}(t) &= \vb*{A}_{c}\vb*{x}(t) + \begin{bmatrix} \vb*{B}_{c} & \vb*{D}_{c} \end{bmatrix} \begin{bmatrix} \vb*{u}(t)\\ \vb*{w}(t) \end{bmatrix}\\
+\end{aligned}
+\end{equation}
+which is a linear system with two inputs.
+
+\subsubsection{Discrete-Time Disturbances}
+Grouping $\vb*{u}(t)$ and $\vb*{w}(t)$ together, as well as $\vb*{B}_{c}$ and $\vb*{D}_{c}$, the model specified in Equation \eqref{fixed_point_linearization} is then discretized according to the control system sample rate, assuming a zero-order-hold (ZOH) on the both inputs.  The resulting model is
+\begin{equation}
+\label{fixed_point_linearization_discrete}
+\begin{aligned}
+	\vb*{x}_{k+1} &= \vb*{A}\vb*{x}_{k} + \begin{bmatrix} \vb*{B} & \tilde{\vb*{D}} \end{bmatrix} \begin{bmatrix} \vb*{u}_{k}\\ \vb*{w}_{k} \end{bmatrix}\\
+\end{aligned}
+\end{equation}
+
+Lastly, although the control synthesis techniques utilized in this work do not incorporate noise perturbations explicitly into their regulator performance cost, the effect of a scalar lumped disturbance is added to the discretized model, in a way that scales to each state based on an \emph{a priori} guess of the expected maximum noise power.  The final disturbance input mapping matrix $\vb{D}$ is calculated by concatenating $\tilde{\vb*{D}}$ with a column vector $\vb*{d}$ of the chosen scaling terms of the lumped disturbance, i.e., $\vb*{D} = \begin{bmatrix} \tilde{\vb*{D}} & \vb*{d} \end{bmatrix}$.  The resulting discrete-time model is in the ``generalized plant'' form used for robust control given by Equation \eqref{discrete_linear_plant}.  Table \ref{table:max_noise} lists the maximum noise power used to determine the scaling $\vb*{d}$ vector.  Note that these are somewhat exaggerated and it is more likely that the noise seen on plant outputs may be filtered and/or processed by a state estimator.
+\begin{table}[H]
+\centering
+\begin{tabular}{|c||c|c|}
+	\hline
+	\textbf{Type} & \multicolumn{2}{c|}{\textbf{Maximum Noise Power}}\\
+	\hline
+	Position & 0.1 m$^{2}$ & 0.1 m$^{2}$\\
+	\hline
+	Angle & 0.1 deg$^{2}$ & 0.00175 rad$^{2}$\\
+	\hline
+	Speed & 0.05 m$^{2}$s$^{-2}$ & 0.05 m$^{2}$s$^{-2}$\\
+	\hline
+	Angular Rate & 0.01 deg$^{2}$s$^{-2}$ &  0.000175 rad$^{2}$s$^{-2}$\\
+	\hline
+\end{tabular}
+\caption{Maximum noise power for different types of measurements.}
+\label{table:max_noise}
+\end{table}
+
+\section{Case Study Systems}
+For examination and testing, three case studies are selected: a double integrator, a cart pole, and a simplified two-link robotic arm.  Diagrams are found in Figure \ref{fig:case_study_systems}.
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.32\textwidth}
+    \centering
+    %\hspace{-10pt}
+    \resizebox{\textwidth}{!}{
+	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+		% Input
+		\node [input, name=input] {};
+	
+		% Cart
+		\node [thick,block, right of=input, node distance=2.25cm] (cart) {};
+		\draw [draw,->] (input) -- node {$f(t)$} (cart);
+		\draw [thick] (1.47cm, -0.70cm) circle [radius=0.19cm]; % wheel 1
+		\draw [thick] (3.05cm, -0.70cm) circle [radius=0.19cm]; % wheel 2
+
+		% Cart position
+		\draw[dotted](0cm,-2.3cm) -- (0cm,-0.3cm);
+		\draw[dotted](2.25cm,-2.3cm) -- (2.25cm,0cm);
+		\node at (1.65cm,0.25cm) {$m_{c}$};
+		\node at (-0.12cm, -1.9cm) (refy) {};
+		\node [output, right of=refy, node distance=2.4cm] (y) {};
+		\draw [->] (refy) -- node [name=y] {$y(t)$}(y);
+	
+		% Cart velocity
+		\node [output, above of=cart, node distance=0cm] (refydot) {};
+		\node [output, right of=refydot, node distance=1.9cm] (ydot) {};
+		\draw [->] (refydot) -- node [name=x, pos=0.8] {$\dot{y}(t)$}(ydot);
+
+		% Ground
+		\draw[-](0,-0.9cm) -- (4.25,-0.9cm);
+		\draw[-](0.4,-0.9cm) -- (0.0,-1.2cm);
+		\draw[-](0.8,-0.9cm) -- (0.4,-1.2cm);
+		\draw[-](1.2,-0.9cm) -- (0.8,-1.2cm);
+		\draw[-](1.6,-0.9cm) -- (1.2,-1.2cm);
+		\draw[-](2.0,-0.9cm) -- (1.6,-1.2cm);
+		\draw[-](2.4,-0.9cm) -- (2.0,-1.2cm);
+		\draw[-](2.8,-0.9cm) -- (2.4,-1.2cm);
+		\draw[-](3.2,-0.9cm) -- (2.8,-1.2cm);
+		\draw[-](3.6,-0.9cm) -- (3.2,-1.2cm);
+		\draw[-](4.0,-0.9cm) -- (3.6,-1.2cm);
+	\end{tikzpicture}
+    }
+    %\vspace{60pt}
+    \caption{\small Double integrator.}
+    \label{fig:double_integrator}
+\end{subfigure}
+%
+\begin{subfigure}{0.32\textwidth}
+    \centering
+    %\hspace{-10pt}
+    \resizebox{\textwidth}{!}{
+    	% Cart pole (cart on a track with inverted pendulum)
+	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+		% Input
+		\node [input, name=input] {};
+	
+		% Cart
+		\node [thick,block, right of=input, node distance=2.25cm] (cart) {};
+		\draw [draw,->] (input) -- node {$f(t)$} (cart);
+		\draw [thick] (1.47cm, -0.70cm) circle [radius=0.19cm]; % wheel 1
+		\draw [thick] (3.05cm, -0.70cm) circle [radius=0.19cm]; % wheel 2
+
+		% Cart position
+		\draw[dotted](0cm,-2.3cm) -- (0cm,-0.3cm);
+		\draw[dotted](2.25cm,-2.3cm) -- (2.25cm,1.3cm);
+		\node at (1.65cm,0.25cm) {$m_{c}$};
+		\node at (-0.12cm, -1.9cm) (refy) {};
+		\node [output, right of=refy, node distance=2.4cm] (y) {};
+		\draw [->] (refy) -- node [name=y] {$y(t)$}(y);
+	
+		% Cart velocity
+		\node [output, above of=cart, node distance=0cm] (refydot) {};
+		\node [output, right of=refydot, node distance=1.9cm] (ydot) {};
+		\draw [->] (refydot) -- node [name=x, pos=0.8] {$\dot{y}(t)$}(ydot);
+
+		% Pole
+		\draw [thick] (2.25cm,0.525cm) -- (3.2cm,2.1cm);
+		\node at (3cm,1.3cm) {$l$};
+		\draw [thick] (3.3cm,2.3cm) circle [radius=0.2cm];
+		\node at (3.4cm,2.65cm) {$m_{p}$};
+
+		% Pole angle/angular rate
+		\draw [<-] (2.56cm,1.05cm) arc [radius=2cm, start angle=71, end angle=80];
+		\node at (1.9cm,1.6cm) {$\theta(t), \dot{\theta}(t)$};
+
+		% Ground
+		\draw[-](0,-0.9cm) -- (4.25,-0.9cm);
+		\draw[-](0.4,-0.9cm) -- (0.0,-1.2cm);
+		\draw[-](0.8,-0.9cm) -- (0.4,-1.2cm);
+		\draw[-](1.2,-0.9cm) -- (0.8,-1.2cm);
+		\draw[-](1.6,-0.9cm) -- (1.2,-1.2cm);
+		\draw[-](2.0,-0.9cm) -- (1.6,-1.2cm);
+		\draw[-](2.4,-0.9cm) -- (2.0,-1.2cm);
+		\draw[-](2.8,-0.9cm) -- (2.4,-1.2cm);
+		\draw[-](3.2,-0.9cm) -- (2.8,-1.2cm);
+		\draw[-](3.6,-0.9cm) -- (3.2,-1.2cm);
+		\draw[-](4.0,-0.9cm) -- (3.6,-1.2cm);
+	\end{tikzpicture}
+    }
+    %\vspace{60pt}
+    \caption{\small Cart pole.}
+    \label{fig:cart_pole}
+\end{subfigure}
+%
+\begin{subfigure}{0.34\textwidth}
+    \centering
+    \resizebox{\textwidth}{!}{
+    	% Robot arm (two link, masses concentrated at ends)
+	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+		% Link 1 (arm)
+		\draw [thick] (0.25cm,0.6cm) -- (1.75cm,2.1cm);
+		\node at (1.35cm,1.2cm) {$l_{1}$};
+		\node at (1.8cm,2.6cm) {$m_{1}$};
+
+		% Link 2 (forearm)
+		\draw [thick] (1.75cm,2.15cm) -- (3.3cm,2.8cm);
+		\node at (2.7cm,2.21cm) {$l_{2}$};
+		\node at (3.8cm,2.6cm) {$m_{2}$};
+
+		% Joint 1 (shoulder)
+		\draw [thick] (0cm,0cm) -- (0.5cm,0cm) -- (0.25cm,0.5cm) -- (0cm,0cm);
+		\draw [thick,fill=white] (0.25cm,0.5cm) circle [radius=0.15cm];
+
+		% Joint 2 (elbow)
+		\draw [thick,fill=white] (1.85cm,2.15cm) circle [radius=0.15cm];
+
+		% End of joint 2 (hand)
+		\draw [thick,fill=white] (3.3cm,2.8cm) circle [radius=0.15cm];
+
+		% Joint 1 (shoulder) angle/angular rate
+		\draw[dotted](0.25cm,1.5cm) -- (0.25cm,-0.8cm);
+		\draw [->] (0.25cm,1.2cm) arc [radius=0.6cm, start angle=90, end angle=45];
+		\node at (0.2cm,1.8cm) {$\theta_{1}(t), \dot{\theta}_{1}(t)$};
+
+		% Controlled torques
+		\draw [thick,->] (0.1cm,0.8cm) arc [radius=0.3cm, start angle=120, end angle=-140];
+		\node at (1cm,0.4cm) {$\tau_{1}(t)$};
+		\draw [thick,->]  (1.68cm,2.4cm) arc [radius=0.3cm, start angle=120, end angle=-140];
+		\node at (2.2cm,1.6cm) {$\tau_{2}(t)$};
+
+		% Joint 2 (arm) angle/angular rate
+		\draw[dotted](1.85cm,2.15cm) -- (2.95cm,3.25cm);
+		\draw [->] (2.7cm,3cm) arc [radius=0.6cm, start angle=45, end angle=7];
+		\node at (3.3cm,3.5cm) {$\theta_{2}(t), \dot{\theta}_{2}(t)$};
+
+		% Ground
+		\draw[-](-0.4,0cm) -- (3.6,0cm);
+		\draw[-](0.0,0cm) -- (-0.4,-0.26cm);
+		\draw[-](0.4,0cm) -- (0.0,-0.26cm);
+		\draw[-](0.8,0cm) -- (0.4,-0.26cm);
+		\draw[-](1.2,0cm) -- (0.8,-0.26cm);
+		\draw[-](1.6,0cm) -- (1.2,-0.26cm);
+		\draw[-](2.0,0cm) -- (1.6,-0.26cm);
+		\draw[-](2.4,0cm) -- (2.0,-0.26cm);
+		\draw[-](2.8,0cm) -- (2.4,-0.26cm);
+		\draw[-](3.2,0cm) -- (2.8,-0.26cm);
+		\draw[-](3.6,0cm) -- (3.2,-0.26cm);
+	\end{tikzpicture}
+    }
+    \vspace{6pt}
+    \caption{\small Robot arm.}
+    \label{fig:robot_arm}
+\end{subfigure}
+\caption{Case studies used to evaluate the data-driven techniques.}
+\label{fig:case_study_systems}
+\end{figure}
+
+\subsection{Double Integrator}
+The double integrator is the simplest canonical example of a second-order dynamical system with a single mass in one-dimensional space, subject to time-varying force input.  The states of this system are the position $y(t)$ and velocity $\dot{y}(t)$, and the input is the force $f(t)$ pushing the mass.  The plant model used for control synthesis and simulation dynamics are the same, and linear throughout the entire state space:
+\begin{equation}
+\begin{aligned}
+	\begin{bmatrix}
+		\dot{y}(t)\\
+		\ddot{y}(t)\\
+	\end{bmatrix}
+	&=
+	\begin{bmatrix}
+		0 & 1\\
+		0 & 0\\
+	\end{bmatrix}
+	\begin{bmatrix}
+		y(t)\\
+		\dot{y}(t)\\
+	\end{bmatrix}
+	+
+	\begin{bmatrix}
+		0\\
+		b_{21}\\
+	\end{bmatrix}
+	f(t)
+\end{aligned}
+\end{equation}
+where
+\begin{equation}
+\begin{aligned}
+	b_{21} &= \frac{1}{m_{c}}
+\end{aligned}
+\end{equation}
+
+The nominal parameters are $m_{c} = 1$ kg and $\Delta t = 0.1$s, the LQ cost weight matrices are chosen to penalize velocity higher than position, to smoothly transition the system back to the origin.  The final chosen values are
+\begin{equation*}
+\begin{aligned}
+    \vb*{Q}_{x} = \begin{bmatrix} 1 & 0 \\ 0 & 5\end{bmatrix}, \hspace{10pt}
+    \vb*{R}_{u} = 1
+\end{aligned}
+\end{equation*}
+and the resulting discrete plant matrices are
+\begin{equation*}
+\begin{aligned}
+    \vb*{A} = \begin{bmatrix}
+        1 & 0.1\\
+        0 & 1\\
+    \end{bmatrix},\hspace{10pt}
+    \vb*{B} = \begin{bmatrix}
+        0.005\\
+        0.1\\
+    \end{bmatrix},\hspace{10pt}
+    \vb*{H} = \begin{bmatrix}
+        1 & 0\\
+        0 & 2.2361\\
+        0 & 0\\
+    \end{bmatrix},\hspace{10pt}
+    \vb*{G} = \begin{bmatrix}
+        0\\
+        0\\
+        1\\
+    \end{bmatrix}
+\end{aligned}
+\end{equation*}
+and following Section \ref{sect:disturbance_modeling} for disturbance modeling, the matrix
+\begin{equation*}
+\begin{aligned}
+    \vb*{D}_{c} = \begin{bmatrix}
+        0\\
+        1\\
+    \end{bmatrix}
+\end{aligned}
+\end{equation*}
+is discretized along with the continuous-time input mapping matrix and horizontally concatenated with column vector $d = \begin{bmatrix} 0.1 & 0.05 \end{bmatrix}^{T}$ to produce
+\begin{equation*}
+\begin{aligned}
+    \vb*{D} = \begin{bmatrix}
+        0.005 & 0.1\\
+        0.1 & 0.05\\
+    \end{bmatrix}
+\end{aligned}
+\end{equation*}
+
+\subsection{Cart Pole}
+The cart-pole is a canonical nonlinear system which is open-loop unstable.  It balances mass $m_{p}$ at the end of an $l$-length pole by horizontally moving a cart with mass $m_{c}$.  The states of this system are the cart's position $y(t)$ and velocity $\dot{y}(t)$, along with the pole's angular offset $\theta(t)$ and rate $\dot{\theta}(t)$.  The input is the force $f(t)$ applied to the cart.  Appendix \ref{appendix:modeling:cartpole} contains the full derivation of the nonlinear motion model using Lagrangian dynamics.  The end result is the following two equations of motion:
+\begin{subequations}
+\begin{align}
+	f &= (m_{c} + m_{p})\ddot{y} + m_{p}l\ddot{\theta}cos(\theta) - m_{p}l\dot{\theta}sin(\theta)\\
+	0 &= m_{p}l\ddot{y}cos(\theta) + m_{p}l^{2}\ddot{\theta} + m_{p}glsin(\theta)
+\end{align}
+\end{subequations}
+which are linearized about the conditions $y = \theta = \dot{y} = \dot{\theta} = 0$ to produce
+\begin{equation}
+\begin{aligned}
+	\begin{bmatrix}
+		\dot{y}(t)\\
+		\dot{\theta}(t)\\
+		\ddot{y}(t)\\
+		\ddot{\theta}(t)\\
+	\end{bmatrix}
+	&=
+	\begin{bmatrix}
+		0 & 0 & 1 & 0\\
+		0 & 0 & 0 & 1\\
+		0 & a_{32} & 0 & 0\\
+		0 & a_{42} & 0 & 0\\
+	\end{bmatrix}
+	\begin{bmatrix}
+		y(t)\\
+		\theta(t)\\
+		\dot{y}(t)\\
+		\dot{\theta}(t)\\
+	\end{bmatrix}
+	+
+	\begin{bmatrix}
+		0\\
+		0\\
+		b_{13}\\
+		b_{14}\\
+	\end{bmatrix}
+	f(t)
+\end{aligned}
+\end{equation}
+where
+\begin{subequations}
+\begin{align}
+	a_{32} &= \frac{-m_{p}g}{m_{c}}\\
+	a_{42} &= \frac{(m_{c} + m_{p})g}{(m_{c} + m_{p})m_{p}l^{2} - m_{p}^{2}l}\\
+	b_{13} &= \frac{m_{p}l^{2}}{(m_{c} + m_{p})m_{p}l^{2} - m_{p}^{2}l}\\
+	a_{14} &= \frac{-m_{p}l}{(m_{c} + m_{p})m_{p}l^{2} - m_{p}^{2}l}
+\end{align}
+\end{subequations}
+
+The nominal parameters are $m_{c} = 1.3282$ kg, $m_{p} = 0.82$ kg, $l = 0.304$ m, and $\Delta t = 0.05$s, the LQ cost weight matrices were determined heuristically after trial-and-error tests with the nominal model.  Linearization error will accrue as the pole angle becomes larger, so the cost weights were chosen in order to penalize errors in the pole's upright angle and angular error.  The final chosen values are
+\begin{equation*}
+\begin{aligned}
+    \vb*{Q}_{x} = \begin{bmatrix}
+        100 & 0 & 0 & 0\\
+        0 & 1000 & 0 & 0\\
+        0 & 0 & 10 & 0\\
+        0 & 0 & 0 & 1000\\
+        \end{bmatrix}, \hspace{10pt}
+    \vb*{R}_{u} = 1
+\end{aligned}
+\end{equation*}
+and the resulting discrete plant matrices are
+\begin{equation*}
+\begin{aligned}
+    \vb*{A} = \begin{bmatrix}
+        1 & 0.0075 & 0.05 & 0.0001\\
+        0 & 0.9355 & 0 & 0.0489\\
+        0 & 0.2963 & 1 & 0.0075\\
+        0 & -2.5532 & 0 & 0.9355\\
+    \end{bmatrix},\hspace{10pt}
+    \vb*{B} = \begin{bmatrix}
+        0.0009\\
+        -0.0031\\
+        0.0373\\
+        -0.1212\\
+    \end{bmatrix},\\%\hspace{10pt}
+    \vb*{H} = \begin{bmatrix}
+        10 & 0 & 0 & 0\\
+        0 & 31.6228 & 0 & 0\\
+        0 & 0 & 3.1623 & 0\\
+        0 & 0 & 0 & 31.6228\\
+        0 & 0 & 0 & 0\\
+    \end{bmatrix},\hspace{10pt}
+    \vb*{G} = \begin{bmatrix}
+        0\\
+        0\\
+        0\\
+        0\\
+        1\\
+    \end{bmatrix}
+\end{aligned}
+\end{equation*}
+and following Section \ref{sect:disturbance_modeling} for disturbance modeling, the matrix
+\begin{equation*}
+\begin{aligned}
+    \vb*{D}_{c} = \begin{bmatrix}
+        0 & 0\\
+        0 & 0\\
+        1 & 0\\
+        0 & 1\\
+    \end{bmatrix}
+\end{aligned}
+\end{equation*}
+is discretized along with the continuous-time input mapping matrix, then horizontally concatenated with column vector $d = \begin{bmatrix} 0.1 & 1.75\text{e-}3 & 0.05 & 1.75\text{e-}4 \end{bmatrix}^{T}$ to produce
+\begin{equation*}
+\begin{aligned}
+    \vb*{D} = \begin{bmatrix}
+        0.0013 & 0 & 0.1\\
+        0 & 0.0012 & 0.000175\\
+        0.05 & 0.0001 & 0.05\\
+        0 & 0.0489 & 0.000175\\
+    \end{bmatrix}
+\end{aligned}
+\end{equation*}
+
+\subsection{Two-Link Robot Arm}
+The two-link robot arm is a nonlinear, trajectory controllable mechanical system which models locomotion of an arm.  It has two links (``arm'' and ``forearm''), each with masses $m_{1}$, $m_{2}$ and lengths $l_{1}$, $l_{2}$, respectively.  For simplicity, rotational inertia of the links are ignored and both masses are taken to be concentrated at the ends of the links.  Both joints (``shoulder'' and ``elbow'') can be torqued arbitrarily to control angular offsets and rates.  The states of this system are the two joints' angular offsets $\theta_{2}(t)$, $\theta_{2}(t)$ and rates $\dot{\theta}_{1}(t)$, $\dot{\theta}_{2}(t)$ and the inputs are torques $\tau_{1}$, $\tau_{2}$.  Appendix \ref{appendix:modeling:robotarm} contains the full derivation of the nonlinear motion model using Lagrangian dynamics.  The end result is the following two equations of motion:
+\begin{subequations}
+\begin{align}
+\begin{split}
+	\tau_{1} &= (m_{1} + m_{2})l_{1}^{2}\ddot{\theta_{1}} +
+	m_{2}l_{2}^{2}(\ddot{\theta_{1}} + \ddot{\theta_{2}})
+	+ 2m_{2}l_{1}l_{2}\ddot{\theta_{1}}cos(\theta_{2})
+	- 2m_{2}l_{1}l_{2}\dot{\theta_{1}}\dot{\theta_{2}}sin(\theta_{2})\\
+	&+ m_{2}l_{1}l_{2}\ddot{\theta_{2}}cos(\theta_{2})
+	- m_{2}l_{1}l_{2}\dot{\theta_{2}}^{2}sin(\theta_{2})
+	- (m_{1} + m_{2})gl_{1}cos(\theta_{1}) - m_{2}gl_{2}sin(\theta_{1} + \theta_{2})
+\end{split}
+	\\
+\begin{split}
+	\tau_{2} &= m_{2}l_{2}^{2}(\ddot{\theta_{1}} + \ddot{\theta_{2}})
+	+ m_{2}l_{1}l_{2}\ddot{\theta_{1}}cos(\theta_{2})
+	+ m_{2}l_{1}l_{2}\dot{\theta_{1}}^{2}sin(\theta_{2})
+	- m_{2}gl_{2}sin(\theta_{1} + \theta_{2})
+\end{split}
+\end{align}
+\end{subequations}
+which are linearized about the conditions $\theta_{1} = \theta_{2} = \dot{\theta}_{1} = \dot{\theta}_{2} = 0$ to produce
+\begin{equation}
+\begin{aligned}
+	\begin{bmatrix}
+		\dot{\theta_{1}}(t)\\
+		\dot{\theta_{2}}(t)\\
+		\ddot{\theta_{1}}(t)\\
+		\ddot{\theta_{2}}(t)\\
+	\end{bmatrix}
+	&=
+	\begin{bmatrix}
+		0 & 0 & 1 & 0\\
+		0 & 0 & 0 & 1\\
+		a_{31} & 0 & 0 & 0\\
+		a_{41} & 0 & 0 & 0\\
+	\end{bmatrix}
+	\begin{bmatrix}
+		\theta_{1}(t)\\
+		\theta_{2}(t)\\
+		\dot{\theta_{1}}(t)\\
+		\dot{\theta_{2}}(t)\\
+	\end{bmatrix}
+	+
+	\begin{bmatrix}
+	0 & 0\\
+	0 & 0\\
+	b_{31} & b_{32}\\
+	b_{41} & b_{42}\\
+	\end{bmatrix}
+	\begin{bmatrix}
+		\tau_{1}(t)\\
+		\tau_{2}(t)\\
+	\end{bmatrix}
+	+
+	\begin{bmatrix}
+		0\\
+		0\\
+		c_{31}\\
+		c_{41}
+	\end{bmatrix}
+\end{aligned}
+\end{equation}
+where
+\begin{subequations}
+\begin{align}
+	a_{31} &= \frac{-m_{1}g(m_{1} + m_{2})}{m_{2}(2m_{1}l_{1} -m_{2}l_{1}
+		+ 2m_{1}l_{2} - 2m_{2}l_{2})}\\
+	a_{41} &= \frac{m_{1}g(m_{1} + m_{2})(l_{1} + l_{2})}{m_{2}(2m_{1}l_{1}
+		- m_{2}l_{1} + 2m_{1}l_{2} - 2m_{2}l_{2})}\\
+	b_{31} &= \frac{m_{2}l_{2}^{2}}{m_{2}l_{2}^{2}((m_{1} + m_{2})l_{1}^{2}
+		+ m_{2}l_{2}^{2} + 2m_{1}l_{1}l_{2})}\\
+	b_{32} &= \frac{-m_{2}l_{2}^{2} - m_{2}l_{1}l_{2}}{m_{2}l_{2}^{2}((m_{1}
+		+ m_{2})l_{1}^{2} + m_{2}l_{2}^{2} + 2m_{1}l_{1}l_{2})}\\
+	b_{41} &=\frac{-m_{2}l_{2}^{2} - m_{2}l_{1}l_{2}}{m_{2}l_{2}^{2}((m_{1}
+		+ m_{2})l_{1}^{2} + m_{2}l_{2}^{2} + 2m_{1}l_{1}l_{2})}\\
+	b_{42} &= \frac{(m_{1} + m_{2})l_{1}^{2} + m_{2}l_{2}^{2}
+		+ 2m_{1}l_{1}l_{2}}{m_{2}l_{2}^{2}((m_{1} + m_{2})l_{1}^{2}
+		+ m_{2}l_{2}^{2} + 2m_{1}l_{1}l_{2})}\\
+	c_{31} &= \frac{-2m_{2}g}{2m_{1}l_{1} -m_{2}l_{1} + 2m_{1}l_{2} - 2m_{2}l_{2}}\\
+	c_{41} &= \frac{2g(m_{1}l_{1} + m_{2}l_{1} + 2m_{1}l_{2})}{l_{2}(2m_{1}l_{1} -m_{2}l_{1} + 2m_{1}l_{2} - 2m_{2}l_{2})}
+\end{align}
+\end{subequations}
+
+Note that, due to affine terms $c_{31}$ and $c_{41}$, a feedforward control term is required for stabilization.  This so-called ``gravity feedforward'' technique is standard in classical (fully-actuated) robotics for setpoint regulation.  However, to simplify the analyses and allow the robot arm to be stabilized using state feedback like the other case studies, a further simplification was made by setting $g = 0$ m/s$^{2}$, which implies $a_{31} = a_{41} = c_{31} = c_{41} = 0$.
+
+The nominal parameters are $g = 0$ m/s$^{2}$, $m_{1} = 5$ kg, $l_{1} = 5$ m, $m_{2} = 2.5$ kg, $l_{2} = 5$ m, and $\Delta t = 0.1$s, the LQ cost weight matrices were determined heuristically after trial-and-error tests with the nominal model.  Like the cart pole, linearization error accrues quickly as the both angles deviate from zero.  The final cost weights reflect the desire to minimize this effect, and are given by
+\begin{equation*}
+\begin{aligned}
+    \vb*{Q}_{x} = \begin{bmatrix}
+        5000 & 0 & 0 & 0\\
+        0 & 5000 & 0 & 0\\
+        0 & 0 & 500 & 0\\
+        0 & 0 & 0 & 500\\
+    \end{bmatrix}, \hspace{10pt}
+    \vb*{R}_{u} = \begin{bmatrix}
+        1 & 0\\
+        0 & 1\\
+    \end{bmatrix}
+\end{aligned}
+\end{equation*}
+and the resulting discrete plant matrices are
+\begin{equation*}
+\begin{aligned}
+    \vb*{A} = \begin{bmatrix}
+        1 & 0 & 0.1 & 0\\
+        0 & 1 & 0 & 0.1\\
+        0 & 0 & 1 & 0\\
+        0 & 0 & 0 & 1\\
+    \end{bmatrix},\hspace{10pt}
+    \vb*{B} = \begin{bmatrix}
+	0.00005 & -0.0001\\
+	-0.0001 & 0.00028\\
+	0.001 & -0.002\\
+	-0.002 & 0.0056\\
+    \end{bmatrix},\\%\hspace{10pt}
+    \vb*{H} = \begin{bmatrix}
+        70.7107 & 0 & 0 & 0\\
+        0 & 70.7107 & 0 & 0\\
+        0 & 0 & 22.3607 & 0\\
+        0 & 0 & 0 & 22.3607\\
+        0 & 0 & 0 & 0\\
+        0 & 0 & 0 & 0\\
+    \end{bmatrix},\hspace{10pt}
+    \vb*{G} = \begin{bmatrix}
+        0 & 0\\
+        0 & 0\\
+        0 & 0\\
+        0 & 0\\
+        1 & 0\\
+        0 & 1\\
+    \end{bmatrix}
+\end{aligned}
+\end{equation*}
+and following Section \ref{sect:disturbance_modeling} for disturbance modeling, the matrix
+\begin{equation*}
+\begin{aligned}
+    \vb*{D}_{c} = \begin{bmatrix}
+        0 & 0\\
+        0 & 0\\
+        1 & 0\\
+        0 & 1\\
+    \end{bmatrix}
+\end{aligned}
+\end{equation*}
+is discretized along with the continuous-time input mapping matrix, then horizontally concatenated with column vector $d = \begin{bmatrix} 1.75\text{e-}3 & 1.75\text{e-}3 & 1.75\text{e-}4 & 1.75\text{e-}4 \end{bmatrix}^{T}$ to produce
+\begin{equation*}
+\begin{aligned}
+    \vb*{D} = \begin{bmatrix}
+        0.005 & 0 & 0.00175\\
+        0 & 0.005 & 0.00175\\
+        0.1 & 0 & 0.00018\\
+        0 & 0.1 & 0.00018\\
+    \end{bmatrix}
+\end{aligned}
+\end{equation*}

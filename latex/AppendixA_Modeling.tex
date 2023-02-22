@@ -1,0 +1,316 @@
+\chapter{Derivations for Plant Models}
+\label{appendix:modeling}
+\section{Double Integrator}
+\label{appendix:modeling:doubleintegrator}
+The double integrator is trivially simple, but its plant model can also be derived using Lagrangian dynamics.  The kinetic and potential energies of the system are
+\begin{subequations}
+\begin{align}
+	K &= \frac{1}{2}m_{c}\dot{y}^{2}\\
+	%
+	U &= 0
+\end{align}
+\end{subequations}
+The Lagrangian $L = K - U$ is thus
+\begin{equation}
+\begin{aligned}
+	L = \frac{1}{2}m_{c}\dot{y}^{2}
+\end{aligned}
+\end{equation}
+For generalized coordinate $q(t) = y(t)$, the following quantities are required:
+\begin{subequations}
+\begin{align}
+\begin{split}
+	\frac{d}{dt} \bigg{(} \frac{\partial L}{\partial \dot{y}} \bigg{)}
+	&= \frac{d}{dt} \bigg{(} \frac{\partial}{\partial \dot{y}} \bigg{(} \frac{1}{2}m_{c}\dot{y}^{2} \bigg{)} \bigg{)}
+	= \frac{d}{dt} \bigg{(} m_{c} \dot{y} \bigg{)} = m_{c} \ddot{y}
+\end{split}
+	\\
+\begin{split}
+	\frac{\partial L}{\partial y}
+	&= \frac{\partial}{\partial y} \bigg{(}
+	\frac{1}{2}m_{c}\dot{y}^{2}
+	\bigg{)} = 0
+\end{split}
+\end{align}
+\end{subequations}
+Plugging these into \eqref{lagrange_eqn} yields
+\begin{equation}
+\begin{aligned}
+	m_{c}\ddot{y} = f
+\end{aligned}
+\end{equation}
+or, in terms of \eqref{manipulator_eqn},
+\begin{subequations}
+\begin{align}
+	\vb*{M(q)} &= m_{c}\\
+	%
+	\vb*{C(q, \dot{q})} &= 0\\
+	%
+	\vb*{g}(\vb*{q}) &= 0\\
+	%
+	\vb*{B}_{\tau} &= 1
+\end{align}
+\end{subequations}
+
+\section{Cart Pole}
+\label{appendix:modeling:cartpole}
+The kinetic and potential energies of the system are
+\begin{subequations}
+\begin{align}
+	K &= \frac{1}{2}(m_{c} + m_{p})\dot{y}^{2} + \frac{1}{2}m_{p}l^{2}\dot{\theta}^{2} + m_{p}l\dot{y}\dot{\theta}cos(\theta)\\
+	%
+	U &= m_{p}glcos(\theta)
+\end{align}
+\end{subequations}
+and the Lagrangian $L = K - U$ is thus
+\begin{equation}
+\begin{aligned}
+	L &= \frac{1}{2}(m_{c} + m_{p})\dot{y}^{2} + \frac{1}{2}m_{p}l^{2}\dot{\theta}^{2}
+		+ m_{p}l\dot{y}\dot{\theta}cos(\theta) -  m_{p}glcos(\theta)
+\end{aligned}
+\end{equation}
+For generalized coordinate $q_{1}(t) = y(t)$, the following quantities are required:
+\begin{subequations}
+\begin{align}
+\begin{split}
+	\frac{d}{dt} \bigg{(} \frac{\partial L}{\partial \dot{y}} \bigg{)}
+	&= \frac{d}{dt} \bigg{(} \frac{\partial}{\partial \dot{y}} \bigg{(}
+	\frac{1}{2}(m_{c} + m_{p})\dot{y}^{2} + \frac{1}{2}m_{p}l^{2}\dot{\theta}^{2}
+		+ m_{p}l\dot{y}\dot{\theta}cos(\theta) -  m_{p}glcos(\theta)
+	\bigg{)} \bigg{)}
+	\\
+	&= \frac{d}{dt} \bigg{(}
+	(m_{c} + m_{p})\dot{y} + m_{p}l\dot{\theta}cos(\theta)
+	\bigg{)}
+	\\
+	&= (m_{c} + m_{p})\ddot{y} + m_{p}l\ddot{\theta}cos(\theta) - m_{p}l\dot{\theta}sin(\theta)
+\end{split}
+	\\
+\begin{split}
+	\frac{\partial L}{\partial y}
+	&= \frac{\partial}{\partial y} \bigg{(}
+	\frac{1}{2}(m_{c} + m_{p})\dot{y}^{2} + \frac{1}{2}m_{p}l^{2}\dot{\theta}^{2}
+		+ m_{p}l\dot{y}\dot{\theta}cos(\theta) - m_{p}glcos(\theta)
+	\bigg{)}
+	\\
+	&= 0
+\end{split}
+\end{align}
+\end{subequations}
+For generalized coordinate $q_{2}(t) = \theta(t)$, the following quantities are required:
+\begin{subequations}
+\begin{align}
+\begin{split}
+	\frac{d}{dt} \bigg{(} \frac{\partial L}{\partial \dot{\theta}} \bigg{)}
+	&= \frac{d}{dt} \bigg{(} \frac{\partial}{\partial \dot{\theta}} \bigg{(}
+	\frac{1}{2}(m_{c} + m_{p})\dot{y}^{2} + \frac{1}{2}m_{p}l^{2}\dot{\theta}^{2}
+		+ m_{p}l\dot{y}\dot{\theta}cos(\theta) -  m_{p}glcos(\theta)
+	\bigg{)} \bigg{)}
+	\\
+	&= \frac{d}{dt} \bigg{(}
+	\frac{1}{2}m_{p}l^{2}\dot{\theta}^{2} + m_{p}l\dot{y}\dot{\theta}cos(\theta)
+	\bigg{)}
+	\\
+	&= m_{p}l\ddot{y}cos(\theta) - m_{p}l\dot{y}\dot{\theta}sin(\theta) + m_{p}l^{2}\ddot{\theta}
+\end{split}
+	\\
+\begin{split}
+	\frac{\partial L}{\partial \theta}
+	&= \frac{\partial}{\partial \theta} \bigg{(}
+	m_{p}l\dot{y}\dot{\theta}cos(\theta) - m_{p}glcos(\theta)
+	 \bigg{)}
+	\\
+	&= -m_{p}l\dot{y}\dot{\theta}sin(\theta) - m_{p}glsin(\theta)
+\end{split}
+\end{align}
+\end{subequations}
+Plugging each of these into \eqref{lagrange_eqn} yields
+\begin{subequations}
+\begin{align}
+	f &= (m_{c} + m_{p})\ddot{y} + m_{p}l\ddot{\theta}cos(\theta) - m_{p}l\dot{\theta}sin(\theta)\\
+	0 &= m_{p}l\ddot{y}cos(\theta) + m_{p}l^{2}\ddot{\theta} + m_{p}glsin(\theta)
+\end{align}
+\end{subequations}
+or, in terms of the manipulator equation \eqref{manipulator_eqn},
+\begin{subequations}
+\begin{align}
+	\vb*{M(q)} &= \begin{bmatrix}
+		m_{c} + m_{p} & m_{p}lcos(\theta)\\
+		m_{p}lcos(\theta) & m_{p}l^{2}\\
+	\end{bmatrix}\\
+	%
+	\vb*{C(q, \dot{q})} &= \begin{bmatrix}
+		0 & -m_{p}l\dot{\theta}sin(\theta)\\
+		0 & 0\\
+	\end{bmatrix}\\
+	%
+	\vb*{g}(\vb*{q}) &= \begin{bmatrix} 0 \\ m_{p}glsin(\theta) \end{bmatrix}\\
+	%
+	\vb*{B}_{\tau} &= \begin{bmatrix} 1\\ 0 \end{bmatrix}
+\end{align}
+\end{subequations}
+
+\section{Robot Arm}
+\label{appendix:modeling:robotarm}
+The kinetic and potential energies of the system are
+\begin{subequations}
+\begin{align}
+\begin{split}
+	K &= \frac{1}{2}(m_{1} + m_{2})l_{1}^{2}\dot{\theta_{1}}^{2} +
+	\frac{1}{2}m_{2}l_{2}^{2}(\dot{\theta_{1}}^{2} + \dot{\theta_{2}}^{2})
+	\\
+	& + \frac{1}{2}m_{2} \bigg{(} l_{2}^{2}\dot{\theta_{1}}^{2}
+	+ 2l_{1}l_{2}\dot{\theta_{1}}^{2}cos(\theta_{2}) + 2l_{1}l_{2}\dot{\theta_{1}}\dot{\theta_{2}}cos(\theta_{2})
+	+ 2l_{2}^{2}\dot{\theta_{1}}\dot{\theta_{2}} \bigg{)}
+\end{split}
+	\\
+	U &= m_{1}gl_{1}cos(\theta_{1}) + m_{2}gl_{1}cos(\theta_{1}) + m_{2}gl_{2}cos(\theta_{1} + \theta_{2})
+\end{align}
+\end{subequations}
+The Lagrangian $L = K - U$ is thus
+\begin{equation}
+\begin{aligned}
+	L &= \frac{1}{2}(m_{1} + m_{2})l_{1}^{2}\dot{\theta_{1}}^{2} +
+	\frac{1}{2}m_{2}l_{2}^{2}(\dot{\theta_{1}}^{2} + \dot{\theta_{2}}^{2})
+	\\
+	& + \frac{1}{2}m_{2} \bigg{(} l_{2}^{2}\dot{\theta_{1}}^{2}
+	+ 2l_{1}l_{2}\dot{\theta_{1}}^{2}cos(\theta_{2}) + 2l_{1}l_{2}\dot{\theta_{1}}\dot{\theta_{2}}cos(\theta_{2})
+	+ 2l_{2}^{2}\dot{\theta_{1}}\dot{\theta_{2}} \bigg{)}
+	\\
+	& - m_{1}gl_{1}cos(\theta_{1}) - m_{2}gl_{1}cos(\theta_{1}) - m_{2}gl_{2}cos(\theta_{1} + \theta_{2})
+\end{aligned}
+\end{equation}
+For generalized coordinate $q_{1}(t) = \theta_{1}(t)$, the following quantities are required:
+\begin{subequations}
+\begin{align}
+\begin{split}
+	\frac{d}{dt} \bigg{(} \frac{\partial L}{\partial \dot{\theta}_{1}} \bigg{)}
+	&= \frac{d}{dt} \bigg{(} \frac{\partial}{\partial \dot{\theta}_{1}} \bigg{(}
+	\frac{1}{2}(m_{1} + m_{2})l_{1}^{2}\dot{\theta_{1}}^{2} +
+	\frac{1}{2}m_{2}l_{2}^{2}(\dot{\theta_{1}}^{2} + \dot{\theta_{2}}^{2})
+	\\
+	& + \frac{1}{2}m_{2} \bigg{(} l_{2}^{2}\dot{\theta_{1}}^{2}
+	+ 2l_{1}l_{2}\dot{\theta_{1}}^{2}cos(\theta_{2}) + 2l_{1}l_{2}\dot{\theta_{1}}\dot{\theta_{2}}cos(\theta_{2})
+	+ 2l_{2}^{2}\dot{\theta_{1}}\dot{\theta_{2}} \bigg{)}
+	\\
+	& - m_{1}gl_{1}cos(\theta_{1}) - m_{2}gl_{1}cos(\theta_{1}) - m_{2}gl_{2}cos(\theta_{1} + \theta_{2})
+	\bigg{)} \bigg{)}
+	\\
+	&= \frac{d}{dt} \bigg{(}
+	(m_{1} + m_{2})l_{1}^{2}\dot{\theta_{1}} +
+	m_{2}l_{2}^{2}(\dot{\theta_{1}} + \dot{\theta_{2}})
+	+ 2m_{2}l_{1}l_{2}\dot{\theta_{1}}cos(\theta_{2}) + m_{2}l_{1}l_{2}\dot{\theta_{2}}cos(\theta_{2})
+	\bigg{)}
+	\\
+	&= (m_{1} + m_{2})l_{1}^{2}\ddot{\theta_{1}} +
+	m_{2}l_{2}^{2}(\ddot{\theta_{1}} + \ddot{\theta_{2}})
+	+ 2m_{2}l_{1}l_{2}\ddot{\theta_{1}}cos(\theta_{2})\\
+	&- 2m_{2}l_{1}l_{2}\dot{\theta_{1}}\dot{\theta_{2}}sin(\theta_{2})
+	+ m_{2}l_{1}l_{2}\ddot{\theta_{2}}cos(\theta_{2})
+	- m_{2}l_{1}l_{2}\dot{\theta_{2}}^{2}sin(\theta_{2})
+\end{split}
+	\\
+\begin{split}
+	\frac{\partial L}{\partial \theta_{1}} &=
+	\frac{\partial}{\partial \theta_{1}} \bigg{(}
+	\frac{1}{2}(m_{1} + m_{2})l_{1}^{2}\dot{\theta_{1}}^{2} +
+	\frac{1}{2}m_{2}l_{2}^{2}(\dot{\theta_{1}}^{2} + \dot{\theta_{2}}^{2})
+	\\
+	& + \frac{1}{2}m_{2} \bigg{(} l_{2}^{2}\dot{\theta_{1}}^{2}
+	+ 2l_{1}l_{2}\dot{\theta_{1}}^{2}cos(\theta_{2}) + 2l_{1}l_{2}\dot{\theta_{1}}\dot{\theta_{2}}cos(\theta_{2})
+	+ 2l_{2}^{2}\dot{\theta_{1}}\dot{\theta_{2}} \bigg{)}
+	\\
+	& - m_{1}gl_{1}cos(\theta_{1}) - m_{2}gl_{1}cos(\theta_{1}) - m_{2}gl_{2}cos(\theta_{1} + \theta_{2})
+	\bigg{)}
+	\\	
+	&= (m_{1} + m_{2})gl_{1}cos(\theta_{1}) + m_{2}gl_{2}sin(\theta_{1} + \theta_{2})
+\end{split}
+\end{align}
+\end{subequations}
+For generalized coordinate $q_{2}(t) = \theta_{2}(t)$, the following quantities are required:
+\begin{subequations}
+\begin{align}
+\begin{split}
+	\frac{d}{dt} \bigg{(} \frac{\partial L}{\partial \dot{\theta}_{2}} \bigg{)}
+	&= \frac{d}{dt} \bigg{(} \frac{\partial}{\partial \dot{\theta}_{2}} \bigg{(}
+	\frac{1}{2}(m_{1} + m_{2})l_{1}^{2}\dot{\theta_{1}}^{2} +
+	\frac{1}{2}m_{2}l_{2}^{2}(\dot{\theta_{1}}^{2} + \dot{\theta_{2}}^{2})
+	\\
+	& + \frac{1}{2}m_{2} \bigg{(} l_{2}^{2}\dot{\theta_{1}}^{2}
+	+ 2l_{1}l_{2}\dot{\theta_{1}}^{2}cos(\theta_{2}) + 2l_{1}l_{2}\dot{\theta_{1}}\dot{\theta_{2}}cos(\theta_{2})
+	+ 2l_{2}^{2}\dot{\theta_{1}}\dot{\theta_{2}} \bigg{)}
+	\\
+	& - m_{1}gl_{1}cos(\theta_{1}) - m_{2}gl_{1}cos(\theta_{1}) - m_{2}gl_{2}cos(\theta_{1} + \theta_{2}
+	\bigg{)} \bigg{)}
+	\\
+	&= \frac{d}{dt} \bigg{(}
+	m_{2}l_{2}^{2}(\dot{\theta_{1}} + \dot{\theta_{2}}) + m_{2}l_{1}l_{2}\dot{\theta_{1}}cos(\theta_{2})
+	\bigg{)}
+	\\
+	&= m_{2}l_{2}^{2}(\ddot{\theta_{1}} + \ddot{\theta_{2}})
+	+ m_{2}l_{1}l_{2}\ddot{\theta_{1}}cos(\theta_{2})
+	- m_{2}l_{1}l_{2}\dot{\theta_{1}}\dot{\theta_{2}}sin(\theta_{2})
+\end{split}
+	\\
+\begin{split}
+	\frac{\partial L}{\partial \theta_{2}} &=
+	\frac{\partial}{\partial \theta_{2}} \bigg{(}
+	\frac{1}{2}(m_{1} + m_{2})l_{1}^{2}\dot{\theta_{1}}^{2} +
+	\frac{1}{2}m_{2}l_{2}^{2}(\dot{\theta_{1}}^{2} + \dot{\theta_{2}}^{2})
+	\\
+	& + \frac{1}{2}m_{2} \bigg{(} l_{2}^{2}\dot{\theta_{1}}^{2}
+	+ 2l_{1}l_{2}\dot{\theta_{1}}^{2}cos(\theta_{2}) + 2l_{1}l_{2}\dot{\theta_{1}}\dot{\theta_{2}}cos(\theta_{2})
+	+ 2l_{2}^{2}\dot{\theta_{1}}\dot{\theta_{2}} \bigg{)}
+	\\
+	& - m_{1}gl_{1}cos(\theta_{1}) - m_{2}gl_{1}cos(\theta_{1}) - m_{2}gl_{2}cos(\theta_{1} + \theta_{2})
+	\bigg{)}
+	\\	
+	&= -m_{2}l_{1}l_{2}\dot{\theta_{1}}^{2}sin(\theta_{2})
+	- m_{2}l_{1}l_{2}\dot{\theta_{1}}\dot{\theta_{2}}sin(\theta_{2})
+	+ m_{2}gl_{2}sin(\theta_{1} + \theta_{2})
+\end{split}
+\end{align}
+\end{subequations}
+Plugging each of these into \eqref{lagrange_eqn} yields
+\begin{subequations}
+\begin{align}
+\begin{split}
+	\tau_{1} &= (m_{1} + m_{2})l_{1}^{2}\ddot{\theta_{1}} +
+	m_{2}l_{2}^{2}(\ddot{\theta_{1}} + \ddot{\theta_{2}})
+	+ 2m_{2}l_{1}l_{2}\ddot{\theta_{1}}cos(\theta_{2})
+	- 2m_{2}l_{1}l_{2}\dot{\theta_{1}}\dot{\theta_{2}}sin(\theta_{2})\\
+	&+ m_{2}l_{1}l_{2}\ddot{\theta_{2}}cos(\theta_{2})
+	- m_{2}l_{1}l_{2}\dot{\theta_{2}}^{2}sin(\theta_{2})
+	- (m_{1} + m_{2})gl_{1}cos(\theta_{1}) - m_{2}gl_{2}sin(\theta_{1} + \theta_{2})
+\end{split}
+	\\
+\begin{split}
+	\tau_{2} &= m_{2}l_{2}^{2}(\ddot{\theta_{1}} + \ddot{\theta_{2}})
+	+ m_{2}l_{1}l_{2}\ddot{\theta_{1}}cos(\theta_{2})
+	+ m_{2}l_{1}l_{2}\dot{\theta_{1}}^{2}sin(\theta_{2})
+	- m_{2}gl_{2}sin(\theta_{1} + \theta_{2})
+\end{split}
+\end{align}
+\end{subequations}
+or, in terms of the manipulator equation \eqref{manipulator_eqn},
+\begin{subequations}
+\begin{align}
+	\vb*{M(q)} &= \begin{bmatrix}
+		(m_{1} + m_{2})l_{1}^{2} + m_{2}l_{2}^{2} + 2m_{1}l_{1}l_{2}cos(\theta_{2}) &
+		m_{2}l_{2}^{2} + m_{2}l_{1}l_{2}cos(\theta_{2})\\
+		m_{2}l_{2}^{2} + m_{2}l_{1}l_{2}cos(\theta_{2}) & m_{2}l_{2}^{2}
+	\end{bmatrix}\\
+	%
+	\vb*{C(q, \dot{q})} &= \begin{bmatrix}
+		-2m_{2}l_{1}l_{2}\dot{\theta_{2}}sin(\theta_{2}) & -m_{2}l_{1}l_{2}\dot{\theta_{2}}sin(\theta_{2})\\
+		m_{2}l_{1}l_{2}\dot{\theta_{2}}sin(\theta_{2}) & 0\\
+	\end{bmatrix}\\
+	%
+	\vb*{g}(\vb*{q}) &= \begin{bmatrix}
+		(m_{1} + m_{2})gl_{1}cos(\theta_{1}) + m_{2}gl_{2}sin(\theta_{1} + \theta_{2})\\
+		m_{2}gl_{2}sin(\theta_{1} + \theta_{2})\\
+	\end{bmatrix}\\
+	%
+	\vb*{B}_{\tau} &= \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}
+\end{align}
+\end{subequations}

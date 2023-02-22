@@ -1,0 +1,369 @@
+% Based on the template by John Clayton found at:
+% https://github.com/jrclayton/jhu-dissertation-mwe
+%
+% JHU Formatting requirements of Sheridan Libraries may be found at:
+% https://www.library.jhu.edu/library-services/
+% electronic-theses-dissertations/formatting-requirements/
+
+\documentclass[12pt]{report}
+
+% PDF Creation settings
+\pdfcompresslevel=9
+\pdfminorversion=5
+\pdfobjcompresslevel=2
+
+% Needed to create a PDF/A file
+\usepackage[a-1b]{pdfx}
+
+% Include pdf docs
+\usepackage{pdfpages}
+% For transferring hyperlinks from PDFs added by pdfpages
+\usepackage{pax}
+
+% For dialect-specific hyphenation etc.
+\usepackage[american]{babel}
+
+% T1 font encoding
+\usepackage[T1]{fontenc}
+% Use UTF8 input encoding
+\usepackage[utf8]{inputenc}
+%\DeclareUnicodeCharacter{00A0}{ }
+
+% Load latin modern, a font with all the characters
+\usepackage{lmodern}
+
+% For generating the dummy text in the mwe template
+\usepackage{lipsum}
+
+% Provides various text symbols (such as \textdegree) in TS1 encoding.
+\usepackage{textcomp}
+
+% provides ul for cv
+\usepackage{soul}
+
+% Set the margins according to JHU specifications
+\usepackage{geometry}
+ \geometry{
+   letterpaper,
+   left=1.0in, % 1.5in
+   right=1.0in,
+   top=1.0in,
+   bottom=1.0in}
+
+% Spacing options
+\usepackage{setspace}
+
+% Typography and fonts
+\usepackage[protrusion]{microtype}
+% For multiple columns
+\usepackage{multicol}
+% for proper text wrapping of nucleic acid sequences
+\usepackage{seqsplit}
+
+% Fancy verbatim-like environment for code
+\usepackage{listings}
+\lstset{basicstyle=\footnotesize\ttfamily,
+        columns=flexible,
+        breaklines=true
+}
+
+% Hyperlink handling
+\usepackage[pdfa]{hyperref}
+\hypersetup{
+   linktocpage,
+   unicode,
+   colorlinks=true,
+   citecolor=link,
+   filecolor=link,
+   linkcolor=link,
+   urlcolor=link
+}
+
+% For tables
+\usepackage{colortbl}
+\usepackage{hhline}
+
+% Color handling
+% \usepackage{xcolor}
+\usepackage{color}
+
+% Color for links
+\definecolor{link}{rgb}{0.45,0.51,0.67}
+
+%%% Table of Contents %%%
+\usepackage[titles]{tocloft}
+% Dots for chapters too
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+
+\setlength{\cfttabnumwidth}{10em}
+\setlength{\cftfignumwidth}{3em}
+
+% To add bibliography to the table of contents
+\usepackage{tocbibind}
+
+% Set depth of TOC items
+\setcounter{tocdepth}{4}
+
+% Set depth of section numbering
+\setcounter{secnumdepth}{4}
+
+\usepackage{calc}
+% Tweak to TOC to add 'chapter' to chapter name instead of a number only
+\renewcommand{\cftchappresnum}{\chaptername\space}
+% Set width of box based on longest label name
+\setlength{\cftchapnumwidth}{\widthof{\textbf{Appendix~IIII~}}}
+\makeatletter
+\usepackage[title,titletoc]{appendix}
+\g@addto@macro\appendix{%
+  \addtocontents{toc}{%
+    \protect\renewcommand{\protect\cftchappresnum}{\appendixname\space}%
+  }%
+}
+\makeatother
+
+% Stylize chapter headings
+%\usepackage{sectsty}
+%\chapterfont{\centering}
+
+% Removes 'Chapter #' title while keeping
+% it listed in the TOC
+\newcommand\chap[1]{%
+  \chapter*{#1}%
+  \addcontentsline{toc}{chapter}{#1}}
+
+% Removes 'Section #' title while keeping
+% it listed in the TOC
+\newcommand\sect[1]{%
+  \section*{#1}%
+  \addcontentsline{toc}{section}{#1}}
+
+% Removes 'Subsection #'title while keeping
+% it listed in the TOC
+\newcommand\subsect[1]{%
+  \subsection*{#1}%
+  \addcontentsline{toc}{subsection}{#1}}
+
+% For oligo table
+% Changes dot to hyphen in figure references and captions
+\renewcommand{\thetable}{\thechapter-\Roman{table}}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{pdflscape}
+
+% Align on numeric decimal in table
+%\usepackage{dcolumn}
+
+% Enhanced control over layout of itemize, enumerate, and description
+\usepackage{enumitem}
+
+% Graphics Packages
+%\usepackage{graphics} 
+\usepackage{graphicx}
+\usepackage{subcaption}
+%\usepackage{float}
+
+% Setup style for figure captions
+\usepackage[font=small,
+            labelfont=bf,
+            labelsep=period,
+            font=sf,
+            hypcap=true]{caption}
+
+% For captions on the side of figures
+\usepackage{ifthen}
+\usepackage[rightcaption]{sidecap}
+
+% Individual panel captions
+%\usepackage{subfig}
+
+% Options for hyperlinking to floats
+\usepackage[all]{hypcap}
+
+% Graphics Path
+\graphicspath{{figures/}}
+
+% To change the name of the figures page
+\renewcommand{\listfigurename}{Figures}
+% To change the default beginning to each line
+\renewcommand{\cftfigpresnum}{\bfseries Figure }
+% Changes dot to hyphen in figure references and captions
+\renewcommand{\thefigure}{\thechapter-\arabic{figure}}
+% To change the distance to the start of the figure title
+\setlength{\cftfignumwidth}{\widthof{\textbf{Figure~5-10~}}}
+
+% Tikz, for drawing vector graphics
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes,arrows}
+
+\usepackage{verbatim}
+\usepackage{subcaption}
+\usepackage{physics}
+
+\usepackage{bigstrut}
+
+% Enable the glossary
+%\makeglossary
+
+% Make appendices
+% \usepackage[title,titletoc]{appendix}
+% \usepackage{appendix}
+%\renewcommand{\appendixname}{Appendix}
+
+% Landscape pages for large tables/figures
+\usepackage{rotating}
+
+\usepackage[numbered,framed]{matlab-prettifier}
+\let\ph\mlplaceholder % shorter macro
+\lstMakeShortInline"
+\lstset{
+  style              = Matlab-editor,
+  basicstyle         = \footnotesize\ttfamily,
+  %escapechar         = ",
+  mlshowsectionrules = true,
+}
+
+\makeatletter
+\renewcommand*\env@matrix[1][*\c@MaxMatrixCols c]{%
+  \hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{#1}}
+\makeatother
+\newcommand*{\vertbar}{\rule[-1ex]{0.5pt}{2.5ex}}
+\newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
+
+\makeatletter
+\def\munderbar#1{\underline{\sbox\tw@{$#1$}\dp\tw@\z@\box\tw@}}
+\makeatother
+
+% Math
+\usepackage{amsmath,amssymb,array,amsthm}
+
+\usepackage{algorithm,algpseudocode}
+
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+
+\newcommand{\bm}[1]{ \mbox{\boldmath $ #1 $} }
+\newcommand{\bin}[2]{\left(\begin{array}{@{}c@{}} #1 \\ #2
+             \end{array}\right) }
+% A math shortcut frequently used by John Muschelli
+\newcommand{\bbeta}{\mbox{\boldmath $\beta$}}
+
+\makeatletter
+\renewcommand*\env@matrix[1][\arraystretch]{%
+  \edef\arraystretch{#1}%
+  \hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{*\c@MaxMatrixCols c}}
+\makeatother
+
+% Fixing spacing on List of Tables/Figures
+\makeatletter
+     \renewcommand*\l@figure{\@dottedtocline{1}{1em}{3.2em}}
+     \let\l@table\l@figure
+\makeatother
+
+\usepackage{float}
+
+% Nomenclature
+\usepackage{nomencl}
+\makenomenclature
+
+\usepackage{rotating}
+
+%%%%%%%%%%%
+% CONTENT %
+%%%%%%%%%%%
+
+\begin{document}
+% For graphics/block diagrams
+\tikzstyle{block} = [draw, rectangle, thick, minimum height=3em, minimum width=6em]
+\tikzstyle{sum} = [draw, circle, node distance=1cm]
+\tikzstyle{input} = [coordinate]
+\tikzstyle{output} = [coordinate]
+\tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+\usetikzlibrary{shapes,arrows}
+\usetikzlibrary{arrows,calc}
+\tikzset{
+    block/.style = {draw, rectangle, 
+        minimum height=1cm, 
+        minimum width=2cm},
+    input/.style = {coordinate,node distance=1cm},
+    output/.style = {coordinate,node distance=4cm},
+    arrow/.style={draw, -latex,node distance=2cm},
+    pinstyle/.style = {pin edge={latex-, black,node distance=2cm}},
+    sum/.style = {draw, circle, node distance=1cm}
+}
+
+% Sets paragraph (and not title) spacing, roughly speaking
+\setlength{\parskip}{3pt}
+\baselineskip=24pt
+%
+% front matter page numbering
+\pagenumbering{roman}
+\input{01_title}
+
+% Setup and add front matter
+\pagestyle{plain}
+\setcounter{page}{2}
+%
+% Add abstract
+\include{02_abstract}
+
+% Add acknowledgments
+\include{03_Acknowledgments}
+
+% Create table of contents
+\tableofcontents
+%
+% Create table list
+\listoftables
+%
+% Create List of figures
+\listoffigures
+\clearpage
+
+% Create Notation page
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Symbols}
+\include{00_notation}
+
+%%%%% MAIN MATTER %%%%%
+% Switch page numbering at the end of front matter, before first chapter
+\pagenumbering{arabic}
+
+\include{04_Introduction}
+\include{05_DiscreteControl}
+\include{06_DataDrivenControl}
+
+\include{07_Modeling}
+\include{08_Approach}
+\include{09_Results}
+\include{10_Conclusion}
+
+\appendix
+%\titleformat{\chapter}{\normalfont\large}{Appendix \thechapter:}{1em}{} % change keyword
+\renewcommand\chaptername{Appendix}
+%\begin{appendices}
+\input{AppendixA_Modeling}
+\input{AppendixB_Sensitivity}
+\input{AppendixC_NumericalMethods}
+%\end{appendices}
+
+% Bibliography/references
+\bibliographystyle{unsrt}
+\bibliography{
+	r00_reinforcement_learning.bib,
+	r01_robust_control.bib,
+	r02_data_driven_control.bib,
+	r03_modeling.bib,
+	r04_optimization.bib
+}
+\end{document} % 

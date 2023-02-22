@@ -1,0 +1,312 @@
+\chapter{Sensitivity of Feedback Systems}
+\label{appendix:sensitivity}
+\section{Overview}
+Consider the discrete-time unity feedback system in Figure \ref{fig:servo_mechanism}.  Controlled inputs $\vb{u}$ are calculated based on the error $\vb{e} = \vb{r} - \vb{y}$ between the reference/desired input and noisy output of $\vb{P}(z)$, and input disturbances add to them.
+The variable $z = e^{j\omega}$, where $\omega$ is a real frequency, $G(z)$ denotes a discrete-time single-input single output (SISO) transfer function, and $\vb{G}(z)$ denotes a discrete multi-input multi-output (MIMO) transfer function matrix. 
+\begin{figure}[H]
+\centering
+\resizebox{0.8\textwidth}{!}{
+	% Feedback control servomechanism with disturbances
+	\begin{tikzpicture}[>=stealth]
+		% Coordinates
+		\coordinate (orig) at (0,0);
+		\coordinate (LLS1) at (1.5,0);
+		\coordinate (LLK) at (3,-0.5);
+		\coordinate (LLS2) at (5,0);
+		\coordinate (LLP) at (5.75,-0.5);
+		\coordinate (LLS3) at (8,-1.5);
+
+		% Loop transfer function bounding box
+		%\node[draw, dashed, minimum width=4.75cm, minimum height=1.5cm,
+		%	anchor=south west, text width=3cm, align=center,fill=gray!4] (L) at ($(LLP.0) - (3.15,0.25)$) {};
+		%\node[text width=1cm] at ($(LLP.0) + (0.3,1.5)$) {\small $\vb*{L}$};
+		%\node[text width=1cm] at ($(LLS2.0) + (0.29,-0.65)$) {\small $\vb*{L}$};
+
+		% Transfer functions
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (P) at (LLP) {\footnotesize $\vb*{P}(z)$};
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (C) at (LLK) {\footnotesize $\vb*{K}(z)$};
+
+		% Sum/junctions
+		\draw [fill=white] (LLS1) circle [radius=0.15cm];
+		\draw [fill=white] (LLS2) circle [radius=0.15cm];
+		\draw [fill=white] (LLS3) circle [radius=0.15cm];
+
+		% Signals
+		\draw[->] ($(LLS1.0) - (1.5,0)$) -- node[above]{\footnotesize $\vb*{r}$} ($(LLS1.0) - (0.15,0)$);
+		\draw[->] ($(LLS1.0) + (0.15,0)$) -- node[above, pos=0.4]{\footnotesize $\vb*{e}$} ($(LLK.0) + (0,0.5)$);
+		\draw[->] ($(LLK) + (1.28,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{u}$} ($(LLS2.0) - (0.15,0)$);
+		\draw[->] ($(LLS2.0) + (0.15,0)$) -- ($(LLP.0) + (0,0.5)$);
+		\draw[->] ($(LLP) + (1.28,0.5)$) -- node[above, pos=0.35]{\footnotesize $\vb*{y}$} ($(LLP.0) + (3.5,0.5)$);
+		\draw[->] ($(LLS3.0) + (0,1.5)$) -- ($(LLS3.0) + (0,0.15)$);
+		\draw[-] ($(LLS3.0) - (0.15, 0)$) |- ($(LLK.0) - (0,1)$);
+		\draw[->] ($(LLK.0) - (0,1)$) -| node[left, pos=0.95]{\footnotesize $-$} ($(LLS1.0) - (0,0.15)$);
+		\draw[->] ($(LLS2.0) + (0,1)$) -- node[above, pos=0]{\footnotesize $\vb*{d}$} ($(LLS2.0) + (0,0.15)$);
+		\draw[->] ($(LLS3.0) + (1.15,0)$) -- node[right, pos=0]{\footnotesize $\vb*{n}$} ($(LLS3.0) + (0.15,0)$);
+	\end{tikzpicture}
+}
+\caption{Feedback system with reference, input disturbances, and measurement noise.}
+\label{fig:servo_mechanism}
+\end{figure}
+
+Nominally, the disturbances and noise are zero and the respective output loop transfer function $\vb*{L}_{o}$ and input loop transfer function $\vb*{L}_{i}$ are given by
+\begin{subequations}
+\label{eq:input_output_sensitivities}
+\begin{align}
+	\vb*{L}_{i}(z) = \vb*{K}(z)\vb*{P}(z) \label{eq:input_loop_transfer}\\
+	\vb*{L}_{o}(z) = \vb*{P}(z)\vb*{K}(z) \label{eq:output_loop_transfer} 
+\end{align}
+\end{subequations}
+
+Sensitivity analyses quantify the feedback system's response to various categories of input perturbations (references and disturbance) and output perturbations (noise).  There are known results which constrain the allowable ``shape'' of various closed-loop transfer functions in the frequency domain, including their peak values (i.e., $\mathcal{H}_{\infty}$ norms) according to intrinsic properties of the loop transfer functions.  For example, the idea of robustness bounds as a function of delays and unstable poles/zeros have also been emphasized in other contexts as a surrogate for understanding the fragility of complex feedback networks seen in other applications such as biology, neuroscience, ecology, or multi-scale physics \cite{doyle2011universal, leong2016understanding, doyle2017universal}.
+
+In engineering applications, these fundamental laws provide design constraints for loop-shaping control design.  For open-loop unstable plants, it is critical to consider real-world limitations such as bandwidth limitations, delays, or input saturation, which can cause latent instabilities when feedback loops are improperly shaped \cite{stein2003respect}.  While SISO plants can be often analyzed analytically, design of robust MIMO controllers is more complicated (both theoretically and computationally) as the plant gain, zeros/poles, delays, and disturbances all have an associated ``direction'' which makes it more difficult to separate their effects.
+
+\section{Sensitivity and Complementary Sensitivity}
+To derive the input/output sensitivities, the interconnections of Figure \ref{fig:servo_mechanism} are re-arranged so that input and output disturbances are lumped into $\vb*{\Delta}_{1}$ and $\vb*{\Delta}_{2}$, respectively.  This is shown in Figure \ref{fig:servo_mechanism_2}.
+\begin{figure}[H]
+\centering
+\resizebox{0.8\textwidth}{!}{
+	% Feedback control servomechanism with disturbances (M-Delta form)
+	\begin{tikzpicture}[>=stealth]
+		% Coordinates
+		\coordinate (orig) at (0,0);
+		\coordinate (LLS1) at (2.25,0);
+		\coordinate (LLK) at (4.5,-2.5);
+		\coordinate (LLP) at (4.5,-0.5);
+		\coordinate (LLS2) at (7,-2);
+
+		% Transfer functions
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (P) at (LLP) {\footnotesize $\vb*{P}(z)$};
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (K) at (LLK) {\footnotesize $\vb*{K}(z)$};
+
+		% Sum/junctions
+		\draw [fill=white] (LLS2) circle [radius=0.15cm];
+		\draw [fill=white] (LLS1) circle [radius=0.15cm];
+
+		% Signals
+		\draw[->] ($(LLS1.0) - (1.25,0)$) -- node[left, pos=0]{\footnotesize $\vb*{\Delta}_{1} = \vb*{d}$} ($(LLS1.0) - (0.15,0)$);
+		\draw[->] ($(LLS2.0) - (0.15,0)$) -- node[above, pos=0.5]{\footnotesize $\vb*{e}_{3}$} ($(LLK) + (1.25,0.5)$);
+		\draw[->] ($(LLS1.0) + (0.15,0)$) -- node[above, pos=0.5]{\footnotesize $\vb*{e}_{1} = \vb*{u}$} ($(LLP.0) + (0,0.5)$);
+		\draw[->] ($(LLP.0) + (1.25,0.5)$) -- node[right, pos=0.99]{\footnotesize $\vb*{e}_{4} = \vb*{y}$} ($(LLP.0) + (3.75,0.5)$);
+		\draw[->] ($(LLP.0) + (2.5,0.5)$) -- ($(LLS2.0) + (0,0.15)$);
+		\draw[->] ($(LLS2.0) + (1.25,0)$) -- node[right, pos=0]{\footnotesize $\vb*{\Delta}_{2} = \vb*{n} - \vb*{r}$} ($(LLS2.0) + (0.15,0)$);
+		\draw[->] ($(LLK.0) + (0,0.5)$) -| node[left, pos=0.95]{\footnotesize $-$} ($(LLS1.0) - (0,0.15)$);
+		\draw[->] ($(LLK.0) + (0,0.5)$) -- node[left, pos=0.99]{\footnotesize $\vb*{e}_{2}$} ($(LLK.0) + (-3.5,0.5)$);
+	\end{tikzpicture}
+}
+\caption{Feedback system in alternative form typical of classical sensitivity analysis.}
+\label{fig:servo_mechanism_2}
+\end{figure}
+
+Specifically, the input/output sensitivity transfer functions $\vb*{S}_{i}: \vb*{\Delta}_{1} \rightarrow \vb*{e}_{1}$ and $\vb*{S}_{o}: \vb*{\Delta}_{2} \rightarrow \vb*{e}_{2}$ and the input/output complementary sensitivity transfer functions $\vb*{T}_{i}: \vb*{\Delta}_{1} \rightarrow \vb*{e}_{2}$ and $\vb*{T}_{o}: \vb*{\Delta}_{2} \rightarrow \vb*{e}_{4}$ are given in terms of loop transfer functions given by Equations \eqref{eq:input_loop_transfer} and \eqref{eq:output_loop_transfer} by
+\begin{subequations}
+\label{eq:input_output_sensitivities}
+\begin{align}
+	\vb*{S}_{i}(z) &:= [\vb*{I} + \vb*{L}_{i}(z)]^{-1} \label{eq:input_sensitivity}\\
+	\vb*{T}_{i}(z) &:= \vb*{L}_{i}(z)[\vb*{I} + \vb*{L}_{i}(z)]^{-1} \label{eq:input_complementary_sensitivity}\\
+	\vb*{S}_{o}(z) &:= [\vb*{I} + \vb*{L}_{o}(z)]^{-1} \label{eq:output_sensitivity}\\
+	\vb*{T}_{o}(z) &:= \vb*{L}_{o}(z)[\vb*{I} + \vb*{L}_{o}(z)]^{-1} \label{eq:output_complementary_sensitivity}
+\end{align}
+\end{subequations}
+
+Because analyses using output sensitivities are both practically relevant and less restrictive, literature often writes $\vb*{L}(z)$ , $\vb*{S}(z)$ and $\vb*{T}(z)$ to refer to Equations \eqref{eq:output_loop_transfer}, \eqref{eq:output_sensitivity} and \eqref{eq:output_complementary_sensitivity}.
+
+\subsection{Complementary Constraints}
+By definition, the magnitude of the sensitivity and complementary sensitivity must add up to 1 at each frequency.  For SISO systems,
+\begin{equation}
+\label{eq:T_S_I}
+\begin{aligned}
+	S(z) + T(z) \equiv 1
+\end{aligned}
+\end{equation}
+and for MIMO systems,
+\begin{equation}
+\label{eq:T_S_I_mimo}
+\begin{aligned}
+	\vb*{S}(z) + \vb*{T}(z) \equiv \vb*{I}
+\end{aligned}
+\end{equation}
+which can be used to derive an inequality in terms of maximum singular values:
+\begin{equation}
+\begin{aligned}
+	|\bar{\sigma}(\vb*{S}(z)) - \bar{\sigma}(\vb*{T}(z))| \leq 1
+\end{aligned}
+\end{equation}
+
+\subsection{Interpolation Constraints}
+For SISO systems, if the plant $P$ has an unstable pole $p$, the complementary sensitivity function $T(p) = 1$ and $S(p) = 0$, whereas if the plant $P$ has an unstable zero $z$, the complementary sensitivity function $T(p) = 0$ and $S(p) = 1$.  For MIMO systems, a similar property can be stated in terms of eigendecomposition of $\vb*{T}(z)$ and $\vb*{S}(z)$, relating the direction of the unstable poles and/or zeros to the direction of their left eigenvectors at that frequency.
+
+\subsection{Integral Constraints}
+Integral sensitivity constraints are associated with the so-called ``waterbed effect'', the fact that reducing sensitivity at certain frequencies will necessarily increase it at other frequencies.  For discrete-time SISO systems, the integral sensitivity constraints are
+\begin{subequations}
+\label{eq:bode_integral_equations_siso}
+\begin{align}
+	% Bode integral #1
+	&\int_{0}^{2\pi} \text{ln} |S(z)| d\omega = \int_{0}^{2\pi} \text{ln} |S(e^{j\omega})| d\omega
+		= 2\pi \cdot \sum_{i=1}^{N_{p}} \text{ln}|p_{i}| \label{eq:siso_bode_integral}\\
+	%
+	% Bode integral #2
+	&\int_{0}^{2\pi} \text{ln} |T(z)| d\omega = \int_{0}^{2\pi} \text{ln} |T(e^{j\omega})| d\omega
+		= 2\pi \cdot \bigg{[} \sum_{i=1}^{N_{p}} \text{ln}|p_{i}| + \text{ln}|K_{m}| \bigg{]} \label{eq:siso_poisson_integral}
+\end{align}
+\end{subequations}
+where $N_{p}$ is the number of unstable poles in $L(z)$ and $K_{m}$ is its first non-zero Markov parameter \cite{sung1988properties, sung1989properties, emami2019bode}.  For discrete-time MIMO systems, the integral constraints \eqref{eq:siso_bode_integral} and \eqref{eq:siso_poisson_integral} have been generalized using the determinant \cite{emami2019bode} or singular values \cite{freudenberg1988frequency, hara1989constraints, mohtadi1990bode} to represent the magnitude of the sensitivity function, e.g.,
+\begin{subequations}
+\label{eq:bode_integral_equations_siso}
+\begin{align}
+	% Bode integral #1
+	&\int_{0}^{2\pi} \text{ln} |\text{det } \vb*{S}(z)| d\omega = \int_{0}^{2\pi} \text{ln} |\text{det } \vb*{S}(e^{j\omega})| d\omega
+		= 2\pi \cdot \sum_{i=1}^{N_{p}} \text{ln}|p_{i}| \label{eq:siso_bode_integral}\\
+	%
+	% Bode integral #2
+	&\int_{0}^{2\pi} \text{ln} |\text{det } \vb*{T}(z)| d\omega = \int_{0}^{2\pi} \text{ln} |\text{det } \vb*{T}(e^{j\omega})| d\omega
+		= 2\pi \cdot \bigg{[} \sum_{i=1}^{N_{p}} \text{ln}|p_{i}| + \text{ln}|K_{m}| \bigg{]} \label{eq:siso_poisson_integral}
+\end{align}
+\end{subequations}
+
+In both SISO and MIMO cases, the discrete-time integral constraints are almost identical to their continuous-time equivalents apart from the integral being taken over a finite limit \cite{emami2019bode}.  It should be noted there is an additional integral constraint which applies when $\vb*{L}(z)$ has an unstable zero, that is omitted for brevity.  Full details can be found in \cite{chen2000logarithmic,emami2019bode} for discrete-time systems and \cite{freudenberg1985right, freudenberg1988frequency, boyd1991linear, chen1997logarithmic, chen1998logarithmic, stein2003respect, skogestad2005multivariable} for continuous-time systems.
+
+\subsection{Disk-Based Stability Margins}
+The disk margin is a scalar quantity which is related to the minimum stability margins in the case of simultaneous gain and phase perturbations to the loop transfer function.  There are different methods of computing this based on a ``skew'' parameter; this effectively selects whether to analyze the sensitivity function vs. the complementary sensitivity function, but in this case the default of MATLAB's "diskmargin" command was used in which the skew parameter is 0.  This corresponds to a ``balance'' between the sensitivity and complementary sensitivity functions.
+
+\section{Generalized Plant Notation}
+\subsection{Servomechanisms}
+An alternative representation of Figure \ref{fig:servo_mechanism} is shown in Figure \ref{fig:servo_mechanism_generalized}, with the generalized plant shown as a dotted box.  In the servomechanism, feedback noise $\vb*{n}$, input perturbations $\vb*{d}$, and reference inputs $\vb*{r}$ can all be considered to be disturbances, and a fictitious performance output is constructed by weighting control error $\vb*{e}$ and input $\vb*{u}$.
+\begin{figure}[H]
+\centering
+\vspace{10pt}
+    \resizebox{0.8\textwidth}{!}{
+	% Feedback control servomechanism with disturbances, "generalized plant" form
+	\begin{tikzpicture}[>=stealth]
+		% Coordinates
+		\coordinate (orig) at (0,0);
+		\coordinate (LLS1) at (3.5,0);
+		\coordinate (LLP) at (4.25,-0.5);
+		\coordinate (LLK) at (4.25,-2.5);
+		\coordinate (LLS2) at (6.25,0);
+		\coordinate (LLS3) at (7.5,0);
+		\coordinate (LLWu) at (8,2.25);
+		\coordinate (LLWx) at (8,1);
+
+		% Generalized "disturbance plant" bounding box
+		\node[draw, dashed, minimum width=7cm, minimum height=4.25cm,
+			anchor=south west, text width=3cm, align=center,fill=gray!3] (T0) at ($(LLP.0) - (1.75,0.25)$) {};
+		%\node[text width=10cm] at ($(LLP.0) + (4.75,4.3)$) {\large Generalized Plant: $\vb*{T}_{0}$};
+
+		% Transfer functions
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (P) at (LLP) {\footnotesize $\vb*{P}(z)$};
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (K) at (LLK) {\footnotesize $\vb*{K}(z)$};
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (Wu) at (LLWu) {\footnotesize $\vb*{W}_{u}(z)$};
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (Wx) at (LLWx) {\footnotesize $\vb*{W}_{e}(z)$};
+
+		% Sum/junctions
+		\draw [fill=white] (LLS1) circle [radius=0.15cm];
+		\draw [fill=white] (LLS2) circle [radius=0.15cm];
+		\draw [fill=white] (LLS3) circle [radius=0.15cm];
+
+		% Signals
+		\draw[->] ($(LLS1.0) + (0.15,0)$) -- ($(LLP.0) + (0,0.5)$);
+		\draw[->] ($(LLS1.0) - (1.75,0)$) -- node[left, pos=0]{\footnotesize $\vb*{u}$} ($(LLS1.0) - (0.15,0)$);
+		\draw[->] ($(LLS1.0) - (2.5,-1)$) -| node[left, pos=0]{\footnotesize $\vb*{d}$} ($(LLS1.0) + (0,0.15)$);
+		\draw[->] ($(LLS1.0) - (2.5,-1.6)$) -| node[left, pos=0]{\footnotesize $\vb*{n}$} ($(LLS2.0) + (0,0.15)$);
+		\draw[->] ($(LLS1.0) - (2.5,-2.25)$) -| node[left, pos=0]{\footnotesize $\vb*{r}$} ($(LLS3.0) + (0,0.15)$);
+		\draw[->] ($(LLP.0) + (1.25,0.5)$) -- ($(LLS2.0) - (0.15,0)$);
+		\draw[->] ($(LLS2.0) + (0.15,0)$) -- node[above, pos=0.5]{\footnotesize $\vb*{y}$}  ($(LLS3.0) - (0.15,0)$);
+		\draw[->] ($(LLS2.0) + (0.15,0)$) -- node[below, pos=0.9]{\footnotesize $-$} ($(LLS3.0) - (0.15,0)$);
+		\draw[-] ($(LLS3.0) + (0.15,0)$) -- node[right, pos=1]{\footnotesize $\vb*{e}$} ($(LLS3.0) + (2.5,0)$);
+		\draw[->] ($(LLS3.0) + (2.5,0)$) |- ($(LLK.0) + (1.25,0.5)$);
+		\draw[-] ($(LLK.0) + (0,0.5)$) -| ($(LLS1.0) - (1.75,0)$);
+
+		\draw[->] ($(LLWx) + (0.62,-1)$) -- ($(LLWx) + (0.62,0)$);
+		\draw[->] ($(LLWx.0) + (1.25,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{z}_{e}$} ($(LLWx.0) + (3.25,0.5)$);
+		\draw[->] ($(LLS1.0) - (0.5,0)$) |- ($(LLWu.0) + (0,0.5)$);
+		\draw[->] ($(LLWu.0) + (1.25,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{z}_{u}$} ($(LLWu.0) + (3.25,0.5)$);
+	\end{tikzpicture}
+}
+\caption{Servomechanism in the ``generalized plant'' notation.}
+\label{fig:servo_mechanism_generalized}
+\end{figure}
+
+The augmented plant is formed by grouping the disturbance inputs as $\vb*{w} = \begin{bmatrix} \vb*{r} & \vb*{n} & \vb*{d} \end{bmatrix}^{T}$ and performance outputs as $\vb*{z} = \begin{bmatrix} \vb*{z}_{e} & \vb*{z}_{u} \end{bmatrix}^{T}$.
+
+\subsection{Setpoint Regulators}
+For the setpoint regulation problem, the reference input is constant and the plant's output is typically defined as relative to the setpoint.  With the simplification $\vb*{r} = 0$, the control input $\vb*{u} = -\vb*{K}(z)\vb*{y}$, or equivalently, $\vb*{u} = \vb*{K}(z)\vb*{y}$ if the negative sign is subsumed into the controller.
+\begin{figure}[H]
+\centering
+\vspace{10pt}
+    \resizebox{0.8\textwidth}{!}{
+	% Feedback control servomechanism with disturbances, "generalized plant" form
+	\begin{tikzpicture}[>=stealth]
+		% Coordinates
+		\coordinate (orig) at (0,0);
+		\coordinate (LLS1) at (3.5,0);
+		\coordinate (LLP) at (4.25,-0.5);
+		\coordinate (LLK) at (4.25,-2.5);
+		\coordinate (LLS3) at (6.25,0);
+		\coordinate (LLWu) at (7,2.25);
+		\coordinate (LLWx) at (7,1);
+
+		% Generalized "disturbance plant" bounding box
+		\node[draw, dashed, minimum width=6cm, minimum height=4.25cm,
+			anchor=south west, text width=3cm, align=center,fill=gray!3] (T0) at ($(LLP.0) - (1.75,0.25)$) {};
+		%\node[text width=10cm] at ($(LLP.0) + (4.75,4.3)$) {\large Generalized Plant: $\vb*{T}_{0}$};
+
+		% Transfer functions
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (P) at (LLP) {\footnotesize $\vb*{P}(z)$};
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (K) at (LLK) {\footnotesize $-\vb*{K}(z)$};
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (Wu) at (LLWu) {\footnotesize $\vb*{W}_{u}(z)$};
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (Wx) at (LLWx) {\footnotesize $\vb*{W}_{y}(z)$};
+
+		% Sum/junctions
+		\draw [fill=white] (LLS1) circle [radius=0.15cm];
+		\draw [fill=white] (LLS3) circle [radius=0.15cm];
+
+		% Signals
+		\draw[->] ($(LLS1.0) + (0.15,0)$) -- ($(LLP.0) + (0,0.5)$);
+		\draw[->] ($(LLS1.0) - (1.75,0)$) -- node[left, pos=0]{\footnotesize $\vb*{u}$} ($(LLS1.0) - (0.15,0)$);
+		\draw[->] ($(LLS1.0) - (2.5,-1)$) -| node[left, pos=0]{\footnotesize $\vb*{d}$} ($(LLS1.0) + (0,0.15)$);
+		\draw[->] ($(LLS1.0) - (2.5,-2.25)$) -| node[left, pos=0]{\footnotesize $\vb*{n}$} ($(LLS3.0) + (0,0.15)$);
+		\draw[->] ($(LLP.0) + (1.25,0.5)$) -- ($(LLS3.0) - (0.15,0)$);
+		\draw[-] ($(LLS3.0) + (0.15,0)$) -- node[right, pos=1]{\footnotesize $\vb*{y}$} ($(LLS3.0) + (2.75,0)$);
+		\draw[->] ($(LLS3.0) + (2.75,0)$) |- ($(LLK.0) + (1.25,0.5)$);
+		\draw[-] ($(LLK.0) + (0,0.5)$) -| ($(LLS1.0) - (1.75,0)$);
+
+		\draw[->] ($(LLWx) + (0.62,-1)$) -- ($(LLWx) + (0.62,0)$);
+		\draw[->] ($(LLWx.0) + (1.25,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{z}_{y}$} ($(LLWx.0) + (3.25,0.5)$);
+		\draw[->] ($(LLS1.0) - (0.5,0)$) |- ($(LLWu.0) + (0,0.5)$);
+		\draw[->] ($(LLWu.0) + (1.25,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{z}_{u}$} ($(LLWu.0) + (3.25,0.5)$);
+	\end{tikzpicture}
+}
+\caption{Setpoint regulator in the ``generalized plant'' notation.}
+\label{fig:regulator_generalized}
+\end{figure}
+
+The augmented plant is formed by grouping the disturbance inputs as $\vb*{w} = \begin{bmatrix} \vb*{n} & \vb*{d} \end{bmatrix}^{T}$ and performance outputs as $\vb*{z} = \begin{bmatrix} \vb*{z}_{y} & \vb*{z}_{u} \end{bmatrix}^{T}$.
+
+\subsection{Setpoint Regulator State-Space Uncertainty}
+A further generalization of the setpoint regulator focuses on model uncertainty in the state-space matrices of the plant, i.e.,
+\begin{equation}
+\label{eq:uncertain_state_space_model}
+\begin{aligned}
+	\vb*{x}_{k+1} &= (\vb*{A} + \vb*{\Delta}_{A})\vb*{x}_{k} + (\vb*{B} + \vb*{\Delta}_{B})\vb*{u}_{k}\\
+		&= \vb*{A}\vb*{x}_{k} + \vb*{B}\vb*{u}_{k} + 
+		\underbrace{\begin{bmatrix} \vb*{\Delta}_{A} & \vb*{\Delta}_{B} \end{bmatrix}
+			\begin{bmatrix} \vb*{x}_{k} \\ \vb*{u}_{k} \end{bmatrix}}_{\text{\normalsize $\vb*{\Delta}_{k}$}}
+\end{aligned}
+\end{equation}
+
+From \eqref{eq:uncertain_state_space_model} there are several possible choices.  One approach is to interpret $\vb*{w}_{k} = \vb*{\Delta}_{k}$ as an additive, zero-mean ``process noise'', where $\vb*{w}_{k}$ at time step $k = 0,1,2,...$ are characterized as independent and identically distributed (IID) and such that $\mathbb{E}[\vb*{w}_{k}] = 0$, $\mathbb{E}[\vb*{w}_{k}\vb*{w}_{k}^{T}] = \vb*{W}$.  Also, the initial state $\vb*{x}_{0}$ is interpreted as another random variable, independent of $\vb*{w}_{k}$, such that $\mathbb{E}[\vb*{x}_{0}] = 0$, $\mathbb{E}[\vb*{x}_{0}\vb*{x}_{0}^{T}] = \vb*{X}$.  This approach is used to derive the LQG/$\mathcal{H}_{2}$ problem.
+
+However, stochastic ``process noise'' can be unrealistic.  If the true $\vb*{\Delta}_{k}$ occurs due to nonlinearities or parameter uncertainty in the plant, it will be non-random \cite{kalman1994randomness} and correlated with $\vb*{x}_{k}$ and $\vb*{u}_{k}$.  One approach to incorporate this is to consider a particular parameterization of $\vb*{\Delta}_{k}$ as the result of a (bounded) transfer function acting on $\vb*{x}_{k}$ and $\vb*{u}_{k}$.  One method of doing so assumes the regulator performance does not depend on disturbances, so that $\vb*{z}_{k} = \vb*{C}_{1}\vb*{x}_{k} + \vb*{D}_{12}\vb*{u}_{k}$ and the uncertainty $\vb*{\Delta}_{k} \approx \begin{bmatrix} \vb*{\Delta}_{x} & \vb*{\Delta}_{x} \end{bmatrix} \vb*{z}_{k}$ can be interpreted using the upper LFR of $\vb*{T}$ as illustrated in Figure \ref{fig:upper_lfr_plant}.
