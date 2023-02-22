@@ -171,7 +171,60 @@ where $N_{p}$ is the number of unstable poles in $L(z)$ and $K_{m}$ is its first
 In both SISO and MIMO cases, the discrete-time integral constraints are almost identical to their continuous-time equivalents apart from the integral being taken over a finite limit \cite{emami2019bode}.  It should be noted there is an additional integral constraint which applies when $\vb*{L}(z)$ has an unstable zero, that is omitted for brevity.  Full details can be found in \cite{chen2000logarithmic,emami2019bode} for discrete-time systems and \cite{freudenberg1985right, freudenberg1988frequency, boyd1991linear, chen1997logarithmic, chen1998logarithmic, stein2003respect, skogestad2005multivariable} for continuous-time systems.
 
 \subsection{Disk-Based Stability Margins}
-The disk margin is a scalar quantity which is related to the minimum stability margins in the case of simultaneous gain and phase perturbations to the loop transfer function.  There are different methods of computing this based on a ``skew'' parameter; this effectively selects whether to analyze the sensitivity function vs. the complementary sensitivity function, but in this case the default of MATLAB's "diskmargin" command was used in which the skew parameter is 0.  This corresponds to a ``balance'' between the sensitivity and complementary sensitivity functions.
+The disk margin \cite{seiler2020introduction} is a scalar quantity which is related to the minimum stability margins in the case of simultaneous gain and phase perturbations to the loop transfer function.  Instead of analyzing disturbance and noise inputs as exogenous inputs, as is shown in Figure \ref{fig:servo_mechanism}, they are instead represented as simultaneous perturbations to gain and phase; these complex perturbations can occur at both plant inputs and outputs.  This is shown in Figure \ref{fig:servo_mechanism_uncertain_diskmargin}.  At the plant input, $\vb*{\Delta}_{1}$ perturbs the gain and phase of the control inputs $\vb*{u}$, and at the plant output, $\vb*{\Delta}_{2}$ perturbs the gain and phase of $\vb*{y}$.
+
+\begin{figure}[H]
+\centering
+\vspace{10pt}
+\resizebox{0.8\textwidth}{!}{
+	% Feedback control servomechanism with disturbances
+	\begin{tikzpicture}[>=stealth]
+		% Coordinates
+		\coordinate (orig) at (0,0);
+		\coordinate (LLS1) at (1.5,0);
+		\coordinate (LLK) at (3,-0.5);
+		\coordinate (LLS2) at (5.15,0);
+		\coordinate (LLP) at (6,-0.5);
+		\coordinate (LLS3) at (7.75,-1.5);
+
+		% Transfer functions
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (P) at (LLP) {\footnotesize $\vb*{P}(z)$};
+		\node[draw, fill=white, minimum width=1cm, minimum height=1cm, anchor=south west,
+			text width=1cm, align=center] (C) at (LLK) {\footnotesize $\vb*{K}(z)$};
+		\node[draw, fill=white, minimum width=0.5cm, minimum height=0.25cm, anchor=south west,
+			text width=0.5cm, align=center] (f1) at ($(LLS2.0) + (-0.25,-0.25)$) {\footnotesize $\vb*{\Delta}_{1}$};
+		\node[draw, fill=white, minimum width=0.5cm, minimum height=0.25cm, anchor=south west,
+			text width=0.5cm, align=center] (f1) at ($(LLS3.0) + (-0.35,-0.25)$) {\footnotesize $\vb*{\Delta}_{2}$};
+
+		% Sum/junctions
+		\draw [fill=white] (LLS1) circle [radius=0.15cm];
+
+		% Signals
+		\draw[->] ($(LLS1.0) - (1.5,0)$) -- node[above]{\footnotesize $\vb*{r}$} ($(LLS1.0) - (0.15,0)$);
+		\draw[->] ($(LLS1.0) + (0.15,0)$) -- node[above, pos=0.4]{\footnotesize $\vb*{e}$} ($(LLK.0) + (0,0.5)$);
+		\draw[->] ($(LLK) + (1.28,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{u}$} ($(LLS2.0) - (0.25,0)$);
+		\draw[->] ($(LLS2.0) + (0.55,0)$) -- ($(LLP.0) + (0,0.5)$);
+		\draw[->] ($(LLP) + (1.28,0.5)$) -- node[above, pos=0.35]{\footnotesize $\vb*{y}$} ($(LLP.0) + (3.5,0.5)$);
+		\draw[->] ($(LLS3.0) + (0,1.5)$) -- ($(LLS3.0) + (0,0.33)$);
+		\draw[-] ($(LLS3.0) - (0.35, 0)$) |- ($(LLK.0) - (0,1)$);
+		\draw[->] ($(LLK.0) - (0,1)$) -| node[left, pos=0.95]{\footnotesize $-$} ($(LLS1.0) - (0,0.15)$);
+	\end{tikzpicture}
+}
+\caption{Feedback system with reference simultaneous gain+phase variation at the plant input and at the plant output.}
+\label{fig:servo_mechanism_uncertain_diskmargin}
+\end{figure}
+
+By decomposing the complex perturbations into their real and imaginary parts, i.e.,
+\begin{subequations}
+\begin{align}
+	\vb*{\Delta}_{1} = \vb*{\Delta}_{1,r} + j \vb*{\Delta}_{1,c}\\
+	\vb*{\Delta}_{2} = \vb*{\Delta}_{2,r} + j \vb*{\Delta}_{2,c}
+\end{align}
+\end{subequations}
+a set of $\vb*{\Delta}_{1}$ and $\vb*{\Delta}_{2}$ can be thought of as a ``disk'' in the complex plane.  The ``disk margin`` refers to the largest set of complex perturbations for which the system is still stable, and is computed using the sensitivity function $\vb{S}$ and/or complementary sensitivity function $\vb{T}$.
+
+There is some judgement in choosing which of the perturbations make most sense for a given applications; for example, a system with highly accurate measurements but inaccurate actuation authority would care more about $\vb*{\Delta}_{1}$ than $\vb*{\Delta}_{2}$.  There are also multiple variations for single-loop disk margins, multi-loop disk margins, simultaneous input and output disk margins, etc.  All of these boil down to choosing which sensitivity function to analyze, and how to interpret the corresponding size of the perturbation set.  By default, MATLAB's "diskmargin" command corresponds to a ``balance'' between the sensitivity and complementary sensitivity functions, given by $(\vb{S} - \vb*{T})/2$.  The corresponding margin (when doubled) represents the stability margin for a simultaneous gain/phase perturbation at both plant input and output.
 
 \section{Generalized Plant Notation}
 \subsection{Servomechanisms}
@@ -309,4 +362,4 @@ A further generalization of the setpoint regulator focuses on model uncertainty 
 
 From \eqref{eq:uncertain_state_space_model} there are several possible choices.  One approach is to interpret $\vb*{w}_{k} = \vb*{\Delta}_{k}$ as an additive, zero-mean ``process noise'', where $\vb*{w}_{k}$ at time step $k = 0,1,2,...$ are characterized as independent and identically distributed (IID) and such that $\mathbb{E}[\vb*{w}_{k}] = 0$, $\mathbb{E}[\vb*{w}_{k}\vb*{w}_{k}^{T}] = \vb*{W}$.  Also, the initial state $\vb*{x}_{0}$ is interpreted as another random variable, independent of $\vb*{w}_{k}$, such that $\mathbb{E}[\vb*{x}_{0}] = 0$, $\mathbb{E}[\vb*{x}_{0}\vb*{x}_{0}^{T}] = \vb*{X}$.  This approach is used to derive the LQG/$\mathcal{H}_{2}$ problem.
 
-However, stochastic ``process noise'' can be unrealistic.  If the true $\vb*{\Delta}_{k}$ occurs due to nonlinearities or parameter uncertainty in the plant, it will be non-random \cite{kalman1994randomness} and correlated with $\vb*{x}_{k}$ and $\vb*{u}_{k}$.  One approach to incorporate this is to consider a particular parameterization of $\vb*{\Delta}_{k}$ as the result of a (bounded) transfer function acting on $\vb*{x}_{k}$ and $\vb*{u}_{k}$.  One method of doing so assumes the regulator performance does not depend on disturbances, so that $\vb*{z}_{k} = \vb*{C}_{1}\vb*{x}_{k} + \vb*{D}_{12}\vb*{u}_{k}$ and the uncertainty $\vb*{\Delta}_{k} \approx \begin{bmatrix} \vb*{\Delta}_{x} & \vb*{\Delta}_{x} \end{bmatrix} \vb*{z}_{k}$ can be interpreted using the upper LFR of $\vb*{T}$ as illustrated in Figure \ref{fig:upper_lfr_plant}.
+However, stochastic ``process noise'' can be unrealistic.  If the true $\vb*{\Delta}_{k}$ occurs due to nonlinearities or parameter uncertainty in the plant, it will be non-random \cite{kalman1994randomness} and correlated with $\vb*{x}_{k}$ and $\vb*{u}_{k}$.  Another approach assumes the parameterization of $\vb*{\Delta}_{k}$ as the result of a (bounded) transfer function acting on $\vb*{x}_{k}$ and $\vb*{u}_{k}$.  In the simplest case, regulator performance does not depend on disturbances, so that $\vb*{z}_{k} = \vb*{C}_{1}\vb*{x}_{k} + \vb*{D}_{12}\vb*{u}_{k}$ and the uncertainty $\vb*{\Delta}_{k} \approx \begin{bmatrix} \vb*{\Delta}_{x} & \vb*{\Delta}_{x} \end{bmatrix} \vb*{z}_{k}$ can be interpreted using the upper LFR of $\vb*{T}$ as shown in Figure \ref{fig:upper_lfr_plant}.
