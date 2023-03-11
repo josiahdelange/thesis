@@ -1,6 +1,6 @@
 \chapter{Discrete-Time State-Space Control}
 \label{chap:DiscreteControl}
-This chapter reviews the infinite-horizon, discrete-time versions of linear optimal control problems addressed in this thesis (LQR, $\mathcal{H}_{2}$ and $\mathcal{H}_{\infty}$) using a common state-space framework based on algebraic Riccati equations.  Full details of game-theoretic robust control for discrete-time systems can be found in the standard text by Basar \cite{bacsar2008h}.  The specific algorithms below are chosen due to their direct mapping into certain data-driven control approaches which allow equivalent cost functions to be specified for optimization-based learning.
+This chapter reviews the infinite-horizon, discrete-time versions of linear optimal control problems addressed in this thesis (LQR, $\mathcal{H}_{2}$ and $\mathcal{H}_{\infty}$) using a common state-space framework based on algebraic Riccati equations.  Full details of game-theoretic robust control for discrete-time systems can be found in the standard text by Ba{\c{s}}ar \cite{bacsar2008h}.  The specific algorithms below are chosen due to their direct mapping into certain data-driven control approaches which allow equivalent cost functions to be specified for optimization-based learning.
 
 \section{Generalized Plant Notation}
 The so-called ``generalized plant'' compactly represents the effect of exogenous inputs (e.g. reference or disturbance inputs, measurement noise, plant uncertainty) on a nominal system.  A plant's state-space realization is augmented with virtual performance output $\vb*{z}$ (to be kept small) and all disturbances are grouped into a second input $\vb*{w}$.  The associated equations are
@@ -15,11 +15,11 @@ The so-called ``generalized plant'' compactly represents the effect of exogenous
 where $\vb*{x} \in \mathbb{R}^{n_{x}}$ is the state, $\vb*{u} \in \mathbb{R}^{n_{u}}$ is the input, $\vb*{w} \in \mathbb{R}^{n_{w}}$ is the disturbance, $\vb*{z} \in \mathbb{R}^{n_{z}}$ is the performance output, and $\vb*{y} \in \mathbb{R}^{n_{y}}$ is the measurement.
 
 \section{Linear Fractional Transformations}
-Robust control often uses the partitioned linear fractional transformation (LFT) notation from \cite{doyle1991review} to write the generalized plant, shown in Figure \ref{fig:open_loop_plant}, as the transfer function matrix
-
+Robust control often uses the linear fractional transformation (LFT) notation from \cite{doyle1991review} to write the generalized plant, shown in Figure \ref{fig:open_loop_plant}, as the partitioned transfer function matrix
 \begin{equation}
+\label{eq:generalized_plant_T_z}
 \begin{aligned}
-	\vb*{T} &:=
+	\vb*{T}(z) &:=
 	\begin{bmatrix}
 	\begin{array}{c|cc}
 		\vb*{A} & \vb*{B}_{1} & \vb*{B}_{2}\\
@@ -30,15 +30,41 @@ Robust control often uses the partitioned linear fractional transformation (LFT)
 	\end{bmatrix}
 	=
 	\begin{bmatrix}
-	\begin{array}{c|cc}
-		\vb*{T}_{11} & \vb*{T}_{12}\\
-		\hline
-		\vb*{T}_{21} & \vb*{T}_{22}\\
-	\end{array}
+		\vb*{T}_{11}(z) & \vb*{T}_{12}(z)\\
+		\vb*{T}_{21}(z) & \vb*{T}_{22}(z)\\
 	\end{bmatrix}
 \end{aligned}
+\vspace{-10pt}
 \end{equation}\\
-where $\vb*{T}_{ij} \triangleq \vb*{C}_{i}(z\vb*{I} - \vb*{A})^{-1}\vb*{B}_{j} + \vb*{D}_{ij}$.  Common permutations are illustrated in Figure \ref{fig:robust_plant_diagrams}.  In Figure \ref{fig:lower_lfr_plant}, a feedback policy $\vb*{K}: \vb*{y} \rightarrow \vb*{u}$ has been applied to $\vb*{T}$.  In Figure \ref{fig:upper_lfr_plant}, the disturbance channel $\vb*{z} \rightarrow \vb*{w}$ is a stable, bounded transfer function $\vb*{\Delta}$, to be used for classical small-gain analyses.  In closed-loop system Figure \ref{fig:closed_loop_plant}, both $\vb*{\Delta}$ and $\vb*{K}$ have been applied.
+where $\vb*{T}_{ij}(z) := \vb*{C}_{i}(z\vb*{I} - \vb*{A})^{-1}\vb*{B}_{j} + \vb*{D}_{ij}$.  In standard notation, the inputs are $\begin{bmatrix} \vb*{w} & \vb*{u} \end{bmatrix}^{T}$ and the outputs are $\begin{bmatrix} \vb*{z} & \vb*{y} \end{bmatrix}^{T}$.  Hence, the intermediate transfer functions comprising $\vb*{T}(z)$ are $\vb*{T}_{11}(z): \vb*{w} \rightarrow \vb*{z}$, $\vb*{T}_{12}(z): \vb*{w} \rightarrow \vb*{y}$, $\vb*{T}_{21}(z): \vb*{u} \rightarrow \vb*{z}$, and $\vb*{T}_{22}(z): \vb*{u} \rightarrow \vb*{y}$.  The generalized plant's interconnection structure, i.e., Equation \eqref{eq:state_space_equations_T0}, can thus be written as
+\begin{subequations}
+\label{eq:frequency_domain_equations_T0}
+\begin{align}
+	\vb*{z} = \vb*{T}_{11}(z)\vb*{w} + \vb*{T}_{12}(z)\vb*{u}\\
+	\vb*{y} = \vb*{T}_{21}(z)\vb*{w} + \vb*{T}_{22}(z)\vb*{u}
+\end{align}
+\end{subequations}
+in accordance with the second expression in Equation \eqref{eq:generalized_plant_T_z}.  While it is equivalent to Equation \eqref{eq:state_space_equations_T0}, Equation \eqref{eq:frequency_domain_equations_T0} is well-suited to frequency-domain analysis of input/output behavior.
+
+Common permutations of the generalized plant are illustrated in Figure \ref{fig:robust_plant_diagrams}.  Figure \ref{fig:open_loop_plant} shows the open-loop generalized plant.  In Figure \ref{fig:lower_lfr_plant}, a feedback policy $\vb*{K}(z): \vb*{y} \rightarrow \vb*{u}$ has been applied to $\vb*{T}(z)$.  Note that $\vb*{K}(z)$ is a transfer function matrix with a known state-space realization \vspace{5pt}
+\begin{equation}
+\label{eq:dynamic_controller_K_z}
+\begin{aligned}
+	\vb*{K}(z) &:=
+	\begin{bmatrix}
+	\begin{array}{c|cc}
+		\vb*{A}_{K} & \vb*{B}_{K}\\
+		\hline
+		\vb*{C}_{K} & \vb*{D}_{K}\\
+	\end{array}
+	\end{bmatrix} := \vb*{C}_{K}(z\vb*{I} - \vb*{A}_{K})^{-1}\vb*{B}_{K} + \vb*{D}_{K}
+\end{aligned}
+\vspace{-15pt}
+\end{equation}\\
+where $\vb*{A}_{K}$, $\vb*{B}_{K}$, $\vb*{C}_{K}$, and $\vb*{D}_{K}$ are real matrices.  In particular, matrices $\vb*{A}_{K}$, $\vb*{B}_{K}$ and $\vb*{C}_{K}$ will be non-zero when $\vb*{K}(z)$ is a so-called ``dynamic controller'' with internal state.  Examples of dynamic controllers include LQG designs and servo controllers involving integral action.
+%Doyle \cite{doyle1991review} notes ``this last notation is deliberately somewhat ambiguous, and can be viewed as both a transfer matrix and its realization. The ambiguity is benign and convenient and can always be resolved from the context.''  Indeed, the first expression in Equation \eqref{eq:generalized_plant_T_z} illustrates the known state-space realization of $\vb*{T}_{ij}(z)$ in terms of its two inputs $\vb*{w}$ and $\vb*{u}$ and its two outputs are $\vb*{z}$ and $\vb*{y}$.  By contrast, the second expression in Equation \eqref{eq:generalized_plant_T_z} illustrates the intermediate transfer function matrices whose responses are summed to produce outputs $\vb*{z}$ and $\vb*{y}$ based on the contributions of $\vb*{w}$ and $\vb*{u}$.
+
+In Figure \ref{fig:upper_lfr_plant}, the disturbance channel $\vb*{z} \rightarrow \vb*{w}$ is modeled by placing a stable, bounded transfer function $\vb*{\Delta}(z)$ in a closed-loop feedback; this is used for classical small-gain analyses involving unstructured uncertainty.  In closed-loop system Figure \ref{fig:closed_loop_plant}, both $\vb*{\Delta}(z)$ and $\vb*{K}(z)$ have been applied.
 \begin{figure}[H]
 \centering
 \begin{subfigure}{0.45\textwidth}
@@ -53,7 +79,7 @@ where $\vb*{T}_{ij} \triangleq \vb*{C}_{i}(z\vb*{I} - \vb*{A})^{-1}\vb*{B}_{j} +
 	
 		% Generalized plant
 		\node[draw, fill=white, minimum width=2cm, minimum height=2cm,
-			anchor=south west, text width=2cm, align=center] (P) at (LLP) {$\vb*{T}$};
+			anchor=south west, text width=2cm, align=center] (P) at (LLP) {$\vb*{T}(z)$};
 	
 		% Input-to-state (LLFT) path
 		\draw[->] ($(P.0) - (3.8,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{u}$} ($(P.0) - (2.25,0.5)$);
@@ -79,24 +105,30 @@ where $\vb*{T}_{ij} \triangleq \vb*{C}_{i}(z\vb*{I} - \vb*{A})^{-1}\vb*{B}_{j} +
 		\coordinate (LLP) at (7,4);
 		\coordinate (LLK) at (7.5,2.4);
 
+		% LLFR bounding box
+		\node[draw, dashed, minimum width=3.7cm, minimum height=3.9cm,
+			anchor=south west, text width=3cm, align=center,fill=gray!10] (Pd) at ($(P.0) - (3,2.75)$) {};
+		\node[text width=5cm] at ($(LLP.0) + (2,2.5)$) {$\mathcal{F}_{\ell}(\vb*{T}, \vb*{K}) =: \vb*{T}_{K}(z)$};
+
 		% Generalized plant
 		\node[draw, fill=white, minimum width=2cm, minimum height=2cm,
-			anchor=south west, text width=2cm, align=center] (P) at (LLP) {$\vb*{T}$};
+			anchor=south west, text width=2cm, align=center] (P) at (LLP) {$\vb*{T}(z)$};
 
 		% Feedback control policy
 		\node[draw, fill=white, minimum width=1cm, minimum height=1cm,
-			anchor=south west, text width=1cm, align=center] (K) at (LLK) {$\vb*{K}$};
+			anchor=south west, text width=1cm, align=center] (K) at (LLK) {$\vb*{K}(z)$};
 
-		% Input-to-state (LLFT) path
-		\draw[-] ($(P.0) + (0,-0.5)$) -- ($(P.0) + (0.7,-0.5)$);
-		\draw[->] ($(P.0) + (0.7,-0.5)$) |- node[right, pos=0.25]{\footnotesize $\vb*{y}$} (K);
-		\draw[-] (K) -| node[left, pos=0.75]{\footnotesize $\vb*{u}$} ($(P.0) - (2.85,0.5)$);
-		\draw[->] ($(P.0) - (2.85,0.5)$) -- ($(P.0) - (2.25,0.5)$);
+		% Control feedback path
+		\draw[-] ($(P.0) + (0,-0.5)$) -- ($(P.0) + (0.25,-0.5)$);
+		\draw[->] ($(P.0) + (0.25,-0.5)$) |- node[right, pos=0.24]{\footnotesize $\vb*{y}$} (K);
+		\draw[-] (K) -| node[left, pos=0.75]{\footnotesize $\vb*{u}$} ($(P.0) - (2.55,0.5)$);
+		\draw[->] ($(P.0) - (2.55,0.5)$) -- ($(P.0) - (2.25,0.5)$);
 
 		% Disturbance-to-performance (ULFT) path
-		\draw[->] ($(P.0) - (3.8,-0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{w}$} ($(P.0) - (2.25,-0.5)$);
-		\draw[->] ($(P.0) + (0,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{z}$}  ($(P.0) + (1.7,0.5)$);
+		\draw[->] ($(P.0) - (4,-0.5)$) -- node[above, pos=0.35]{\footnotesize $\vb*{w}$} ($(P.0) - (2.25,-0.5)$);
+		\draw[->] ($(P.0) + (0,0.5)$) -- node[above, pos=0.55]{\footnotesize $\vb*{z}$}  ($(P.0) + (1.8,0.5)$);
 	\end{tikzpicture}
+	\hspace{-10pt}
     }
     %\vspace{5pt}
     \caption{\small Lower linear fractional representation.}
@@ -105,8 +137,9 @@ where $\vb*{T}_{ij} \triangleq \vb*{C}_{i}(z\vb*{I} - \vb*{A})^{-1}\vb*{B}_{j} +
 %
 \begin{subfigure}{0.45\textwidth}
     \centering
-    \vspace{18pt}
+    %\vspace{18pt}
     \resizebox{0.8\textwidth}{!}{
+	\hspace{-15pt}
 	% Closed-loop disturbance plant
 	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
 		% Coordinates
@@ -114,25 +147,30 @@ where $\vb*{T}_{ij} \triangleq \vb*{C}_{i}(z\vb*{I} - \vb*{A})^{-1}\vb*{B}_{j} +
 		\coordinate (LLP) at (7,4);
 		\coordinate (LLDelta) at (7.5,6.5);
 
+		% ULFR bounding box
+		\node[draw, dashed, minimum width=3.7cm, minimum height=3.78cm,
+			anchor=south west, text width=3cm, align=center,fill=gray!30] (Pd) at ($(P.0) - (3.05,1.16)$) {};
+		\node[text width=5cm] at ($(LLP.0) + (2.8,3.97)$) {$\mathcal{F}_{u}(\vb*{T}, \vb*{\Delta})$};
+
 		% Generalized plant
 		\node[draw, fill=white, minimum width=2cm, minimum height=2cm,
-			anchor=south west, text width=2cm, align=center] (P) at (LLP) {$\vb*{T}$};
+			anchor=south west, text width=2cm, align=center] (P) at (LLP) {$\vb*{T}(z)$};
 
 		% Bounded disturbance map
 		\node[draw, fill=white, minimum width=1cm, minimum height=1cm,
-			anchor=south west, text width=1cm, align=center] (D) at (LLDelta) {$\vb*{\Delta}$};
+			anchor=south west, text width=1cm, align=center] (D) at (LLDelta) {$\vb*{\Delta}(z)$};
 
 		% Input-to-state (LLFT) path
-		\draw[->] ($(P.0) - (3.8,0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{u}$} ($(P.0) - (2.25,0.5)$);
-		\draw[->] ($(P.0) + (0,-0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{y}$} ($(P.0) + (1.7,-0.5)$);
+		\draw[->] ($(P.0) - (4,0.5)$) -- node[above, pos=0.38]{\footnotesize $\vb*{u}$} ($(P.0) - (2.25,0.5)$);
+		\draw[->] ($(P.0) + (0,-0.5)$) -- node[above, pos=0.5]{\footnotesize $\vb*{y}$} ($(P.0) + (1.8,-0.5)$);
 
 		% Disturbance-to-performance (ULFT) path
-		\draw[-] ($(P.0) + (0,0.5)$) -- ($(P.0) + (0.7,0.5)$);
-		\draw[->] ($(P.0) + (0.7,0.5)$) |- node[right, pos=0.25]{\footnotesize $\vb*{z}$} (D);
-		\draw[-] (D) -| node[left, pos=0.75]{\footnotesize $\vb*{w}$} ($(P.0) - (2.85,-0.5)$);
-		\draw[->] ($(P.0) - (2.85,-0.5)$) -- ($(P.0) - (2.25,-0.5)$);
+		\draw[-] ($(P.0) + (0,0.5)$) -- ($(P.0) + (0.25,0.5)$);
+		\draw[->] ($(P.0) + (0.25,0.5)$) |- node[right, pos=0.25]{\footnotesize $\vb*{z}$} (D);
+		\draw[-] (D) -| node[left, pos=0.75]{\footnotesize $\vb*{w}$} ($(P.0) - (2.55,-0.5)$);
+		\draw[->] ($(P.0) - (2.55,-0.5)$) -- ($(P.0) - (2.25,-0.5)$);
 	\end{tikzpicture}
-	\hspace{-10pt}
+	\hspace{-30pt}
     }
     %\vspace{5pt}
     \caption{\small Upper linear fractional representation.}
@@ -141,53 +179,61 @@ where $\vb*{T}_{ij} \triangleq \vb*{C}_{i}(z\vb*{I} - \vb*{A})^{-1}\vb*{B}_{j} +
 %
 \begin{subfigure}{0.4\textwidth}
     \centering
-    %\vspace{25pt}
+    \vspace{10pt}
     \resizebox{0.8\textwidth}{!}{
+	\hspace{-10pt}
 	% Closed-loop generalized plant with uncertainty
 	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
 		% Coordinates
 		\coordinate (orig) at (0,0);
 		\coordinate (LLP) at (7,4);
 		\coordinate (LLK) at (7.5,2.4);
-		\coordinate (LLDelta) at (7.5,6.5);
+		\coordinate (LLDelta) at (7.5,7.25);
+
+		% LLFR bounding box
+		\node[draw, dashed, minimum width=3.7cm, minimum height=3.9cm,
+			anchor=south west, text width=3cm, align=center,fill=gray!10] (Pd) at ($(P.0) - (3,2.75)$) {};
+		\node[text width=5cm] at ($(LLP.0) + (3.15,2.45)$) {$\vb*{T}_{K}(z)$};
 
 		% Generalized plant
 		\node[draw, fill=white, minimum width=2cm, minimum height=2cm,
-			anchor=south west, text width=2cm, align=center] (P) at (LLP) {$\vb*{T}$};
+			anchor=south west, text width=2cm, align=center] (P) at (LLP) {$\vb*{T}(z)$};
 
 		% Feedback control policy
 		\node[draw, fill=white, minimum width=1cm, minimum height=1cm,
-			anchor=south west, text width=1cm, align=center] (K) at (LLK) {$\vb*{K}$};
+			anchor=south west, text width=1cm, align=center] (K) at (LLK) {$\vb*{K}(z)$};
 
 		% Bounded disturbance map
 		\node[draw, fill=white, minimum width=1cm, minimum height=1cm,
-			anchor=south west, text width=1cm, align=center] (D) at (LLDelta) {$\vb*{\Delta}$};
+			anchor=south west, text width=1cm, align=center] (D) at (LLDelta) {$\vb*{\Delta}(z)$};
 
 		% Input-to-state (LLFT) path
-		\draw[-] ($(P.0) + (0,-0.5)$) -- ($(P.0) + (0.7,-0.5)$);
-		\draw[->] ($(P.0) + (0.7,-0.5)$) |- node[right, pos=0.25]{\footnotesize $\vb*{y}$} (K);
-		\draw[-] (K) -| node[left, pos=0.75]{\footnotesize $\vb*{u}$} ($(P.0) - (2.85,0.5)$);
-		\draw[->] ($(P.0) - (2.85,0.5)$) -- ($(P.0) - (2.25,0.5)$);
+		\draw[-] ($(P.0) + (0,-0.5)$) -- ($(P.0) + (0.25,-0.5)$);
+		\draw[->] ($(P.0) + (0.25,-0.5)$) |- node[right, pos=0.25]{\footnotesize $\vb*{y}$} (K);
+		\draw[-] (K) -| node[left, pos=0.75]{\footnotesize $\vb*{u}$} ($(P.0) - (2.55,0.5)$);
+		\draw[->] ($(P.0) - (2.55,0.5)$) -- ($(P.0) - (2.25,0.5)$);
 
 		% Disturbance-to-performance (ULFT) path
-		\draw[-] ($(P.0) + (0,0.5)$) -- ($(P.0) + (0.7,0.5)$);
-		\draw[->] ($(P.0) + (0.7,0.5)$) |- node[right, pos=0.25]{\footnotesize $\vb*{z}$} (D);
-		\draw[-] (D) -| node[left, pos=0.75]{\footnotesize $\vb*{w}$} ($(P.0) - (2.85,-0.5)$);
-		\draw[->] ($(P.0) - (2.85,-0.5)$) -- ($(P.0) - (2.25,-0.5)$);
+		\draw[-] ($(P.0) + (0,0.5)$) -- ($(P.0) + (1,0.5)$);
+		\draw[->] ($(P.0) + (1,0.5)$) |- node[right, pos=0.25]{\footnotesize $\vb*{z}$} (D);
+		\draw[-] (D) -| node[left, pos=0.75]{\footnotesize $\vb*{w}$} ($(P.0) - (3.25,-0.5)$);
+		\draw[->] ($(P.0) - (3.25,-0.5)$) -- ($(P.0) - (2.25,-0.5)$);
 	\end{tikzpicture}
+	\hspace{-55pt}
     }
-    \caption{\small Closed-loop plant with uncertainty.}
+    \caption{\small Closed-loop generalized plant.}
     \label{fig:closed_loop_plant}
 \end{subfigure}
 
-\caption{Common forms of the generalized plant used for robust control analysis.}
+\caption{Common forms of the generalized uncertain plant used for robust control analysis.}
 \label{fig:robust_plant_diagrams}
 \end{figure}
 
-The systems in Figure \ref{fig:lower_lfr_plant} and Figure \ref{fig:upper_lfr_plant} are the respective lower and upper linear fractional representations (LFRs) of the plant, and their equations can be found in \cite{doyle1991review}.  The lower LFR in Figure \ref{fig:lower_lfr_plant}, given by $\vb*{T}_{K}: \vb*{w} \rightarrow \vb*{z}$, will be used to verify robust stability using the small-gain theorem \cite{sandberg1964frequency, zames1966input}.  Specifically, it is a well-known fact that if $||\vb*{T}_{K}||_{\infty} < \gamma$, then the system in Figure \ref{fig:closed_loop_plant} is guaranteed to be stable for the set of perturbations $\vb*{\Delta}$ such that $||\vb*{\Delta}||_{\infty} \leq 1/\gamma$.  This is an instance of the $\mathcal{H}_{\infty}$ suboptimal design problem \cite{basar1989dynamic, bacsar2008h}, and to achieve an optimal control policy $\vb*{K}$, the minimum value of $\gamma$ is found via search.
+The systems in Figure \ref{fig:lower_lfr_plant} and Figure \ref{fig:upper_lfr_plant}, illustrated using dotted gray boxes, are the respective lower and upper linear fractional representations (LFRs) of the plant.  Specifically, the lower LFR of $\vb*{T}(z)$ with respect to $\vb*{K}(z)$ is written as $\mathcal{F}_{\ell}(\vb*{T}, \vb*{K})$ and the upper LFR of $\vb*{T}(z)$ with respect to $\vb*{\Delta}(z)$ is written as $\mathcal{F}_{u}(\vb*{T}, \vb*{\Delta})$.  In this thesis, $\mathcal{F}_{u}(\vb*{T}, \vb*{\Delta})$ is of less practical interest than $\mathcal{F}_{\ell}(\vb*{T}, \vb*{K})$, which is also referred to as $\vb*{T}_{K}(z)$.  Specific derivations of the LFR equations can be found in \cite{doyle1991review}.
 
-The state-space problem formulation of an $\mathcal{H}_{\infty}$ (sub-)optimal control for plant \eqref{eq:state_space_equations_T0} has several variants, depending on whether perfect measurements are available or the (possibly finite) time horizon the control has to act.  Generally, the solutions involve dynamic controllers with internal state (e.g., to estimate the disturbance) \cite{basar1989dynamic, bacsar2008h}.  While these solutions are well-understood when the plant is known, corresponding data-driven solutions are out of scope of this work.  Thus, for this thesis, simplifications are made to solve the $\mathcal{H}_{2}$ and $\mathcal{H}_{\infty}$ problems using a static state feedback policy $\vb*{u}_{k} = -\vb*{K}_{b}\vb*{x}_{k}$.  The simplifications to \eqref{eq:state_space_equations_T0} are:
+As shown in Figure \ref{fig:lower_lfr_plant}, $\vb*{T}_{K}(z): \vb*{w} \rightarrow \vb*{z}$, represents the transfer function from disturbance to performance, when the control policy $\vb*{K}(z)$ has been applied.  This will be used to verify robust stability using the small-gain theorem \cite{sandberg1964frequency, zames1966input}; specifically, it is a well-known fact that if $||\vb*{T}_{K}(z)||_{\infty} < \gamma$, then the system in Figure \ref{fig:closed_loop_plant} is guaranteed to be stable for the set of perturbations $\vb*{\Delta}(z)$ such that $||\vb*{\Delta}(z)||_{\infty} \leq 1/\gamma$.  This is an instance of the $\mathcal{H}_{\infty}$ suboptimal design problem \cite{basar1989dynamic, bacsar2008h}, and to achieve an optimal control policy $\vb*{K}(z)$, the minimum value of $\gamma$ is found via search.
 
+As a side note, the state-space problem formulation of an $\mathcal{H}_{\infty}$ (sub-)optimal control for plant \eqref{eq:state_space_equations_T0} has several variants, depending on whether perfect measurements are available, or, whether the time horizon over which control occurs is fixed.  Generally, the solutions involve dynamic controllers (e.g., to estimate the disturbance) \cite{basar1989dynamic, bacsar2008h}.  While these solutions are well-understood when the plant is known, solving them using data-driven techniques is outside the scope of this work.  Thus, for this thesis, simplifying assumptions are made to solve the $\mathcal{H}_{2}$ and $\mathcal{H}_{\infty}$ problems using a static state feedback policy.  The first assumption is that full-state feedback is available from the generalized plant.  Hence, in Equation \eqref{eq:state_space_equations_T0}, the following simplifications are made:\vspace{5pt}
 \begin{equation}
 \label{eq:lq_performance}
 \begin{aligned}
@@ -198,18 +244,29 @@ The state-space problem formulation of an $\mathcal{H}_{\infty}$ (sub-)optimal c
 	\vb*{D}_{11}^{T}\vb*{D}_{11} = \vb*{R}_{u}, \hspace{10pt}
 	\vb*{C}_{1}^{T} \vb*{D}_{11} = \vb*{0}
 \end{aligned}
+\vspace{-15pt}
 \end{equation}\\
-where $\vb*{Q}_{x}$ and $\vb*{R}_{u}$ are the LQ cost weighting matrices.  As a result, the $\mathcal{H}_{2}$ optimal control is equivalent to the LQR, and the $\mathcal{H}_{\infty}$ (sub-)optimal control is essentially a more robust variant of the LQR.  Using $||\vb*{T}_{K}||_{\infty}$ as a standard metric allows basic comparisons of robustness to be made relatively easily between model-based and data-driven methods of optimizing closed-loop performance using an LQ-type cost function.
+where $\vb*{Q}_{x}$ and $\vb*{R}_{u}$ are the LQ cost weighting matrices.  The second assumption is that the control policy $\vb*{K}(z)$ is a static map from $\vb*{y} = \vb*{x}$ to $\vb*{u}$ which does not require any internal state.  Hence, in Equation \eqref{eq:dynamic_controller_K_z}, the following simplifications are made:
+\begin{equation}
+\label{eq:controller_simplifications}
+\begin{aligned}
+	&\vb*{A}_{K} = \vb*{0}, \hspace{10pt}
+	\vb*{B}_{K} = \vb*{0}, \hspace{10pt}
+	\vb*{C}_{K} = \vb*{0}, \hspace{10pt}
+	\vb*{D}_{K} = -\vb*{K}_{b}
+\end{aligned}
+\end{equation}
+where $\vb*{K}_{b}$ is a static feedback gain matrix, so that $\vb*{u}_{k} = -\vb*{K}_{b}\vb*{x}_{k}$.  As a result, the $\mathcal{H}_{2}$ (LQG) optimal control is equivalent to the LQR, and the $\mathcal{H}_{\infty}$ (sub-)optimal control is essentially a more robust variant of the LQR.  Moreover, using $||\vb*{T}_{K}(z)||_{\infty}$ as a standard metric allows basic comparisons of robustness to be made relatively easily between model-based and data-driven methods of optimizing closed-loop performance using a simple LQ cost function.
 
 \section{Linear Quadratic Optimal Control}
-Consider a discrete, open-loop LTI system with a state-space realization given by
+Consider a discrete, open-loop linear and time-invariant (LTI) system with a state-space realization given by
 \begin{equation}
 \begin{aligned}
 	\vb*{x}_{k+1} &= \vb*{A} \vb*{x}_{k} + \vb*{B} \vb*{u}_{k}\\
 	\vb*{y}_{k} &= \vb*{x}_{k}
 \end{aligned} \label{eq-linear-state-dynamics}
 \end{equation}
-where $\vb*{x} \in \mathbb{R}^{n_{x}}$ is the state, $\vb*{u} \in \mathbb{R}^{n_{u}}$ is the control input, and $\vb*{y} \in \mathbb{R}^{n_{y}}$ is the measurement.  The infinite-horizon objective is to find the control policy which minimizes the quadratic objective function:
+where $\vb*{x} \in \mathbb{R}^{n_{x}}$ is the state, $\vb*{u} \in \mathbb{R}^{n_{u}}$ is the control input, and $\vb*{y} \in \mathbb{R}^{n_{y}}$ is the measurement.  The infinite-horizon objective is to find the control policy that minimizes the quadratic objective function:
 \begin{equation}
 \begin{aligned}
 	J &= \lim_{N \to \infty} \sum_{k = 1}^{N} \big{(} \vb*{x}_{k}^{T} \vb*{Q}_{x} \vb*{x}_{k} + \vb*{u}_{k}^{T} \vb*{R}_{u} \vb*{u}_{k} \big{)}
@@ -259,39 +316,40 @@ where $\vb*{x} \in \mathbb{R}^{n_{x}}$ is the state, $\vb*{u} \in \mathbb{R}^{n_
 and the transfer function from disturbance to performance output is
 \begin{equation}
 \begin{aligned}
-	\vb*{T}_{K}(z) &\triangleq (\vb*{H} - \vb*{G}\vb*{K}_{b})(z\vb*{I} - (\vb*{A} - \vb*{B}\vb*{K}_{b})^{-1})\vb*{D}
+	\vb*{T}_{K}(z) &:= (\vb*{H} - \vb*{G}\vb*{K}_{b})(z\vb*{I} - (\vb*{A} - \vb*{B}\vb*{K}_{b})^{-1})\vb*{D}
 \end{aligned} \label{discrete_transfer_matrix}
 \end{equation}
 
 \subsection{Infinite-Horizon $\mathcal{H}_{2}$ Performance Criteria}
-For $\mathcal{H}_{2}$ optimal control, the infinite-horizon objective is to find the control policy which minimizes the $\mathcal{H}_{2}$ norm of $\vb*{T}_{K}$, which is equivalent to minimizing the following cost function
+For $\mathcal{H}_{2}$ optimal control, the infinite-horizon objective is to find the control policy that minimizes the $\mathcal{H}_{2}$ norm of $\vb*{T}_{K}(z)$, which is equivalent to minimizing the cost function
 \begin{equation}
 \begin{aligned}
 	%
-	J &= \lVert \vb*{T}_{K} \rVert_{2}^{2} \triangleq \lVert \vb*{z} \rVert_{2}^{2} = \lim_{N \to \infty} \sum_{k = 1}^{N} (\vb*{z}_{k}^{T}\vb*{z}_{k})
+	J &= \lVert \vb*{T}_{K}(z) \rVert_{2}^{2} := \lVert \vb*{z} \rVert_{2}^{2} = \lim_{N \to \infty} \sum_{k = 1}^{N} (\vb*{z}_{k}^{T}\vb*{z}_{k})
 	= \lim_{N \to \infty} \sum_{k = 1}^{N} \big{(} \vb*{x}_{k}^{T} \vb*{Q}_{x} \vb*{x}_{k} + \vb*{u}_{k}^{T} \vb*{R}_{u} \vb*{u}_{k} \big{)}
 \end{aligned} \label{T_mu_h2_norm}
 \end{equation}
-which, by design, is equivalent to Equation \eqref{eq-optimal-cost-function} and solved using Equation \eqref{eq-lqr-dare}.  The $\mathcal{H}_{2}$ controller minimizes the power of the impulse response of Equation \eqref{discrete_linear_plant_dynamics_cl} due to a non-zero initial condition, or equivalently, the mean-square response of Equation \eqref{discrete_transfer_matrix} to a white noise disturbance with unit covariance \cite{van2020data}.  The former is associated with LQR and the latter with LQG (where the expected value of Equation \eqref{T_mu_h2_norm} is minimized), but the optimal control given by Equation \eqref{eq-static-lqr-control} is the same in both cases due to the separation principle.
+
+By design, this is equivalent to Equation \eqref{eq-optimal-cost-function} and solved using Equation \eqref{eq-lqr-dare}.  The $\mathcal{H}_{2}$ controller minimizes the power of the impulse response of Equation \eqref{discrete_linear_plant_dynamics_cl} due to a non-zero initial condition, or equivalently, the mean-square response of Equation \eqref{discrete_transfer_matrix} to a white noise disturbance with unit covariance \cite{van2020data}.  The former is associated with LQR and the latter with LQG (where the expected value of Equation \eqref{T_mu_h2_norm} is minimized), but the optimal control given by Equation \eqref{eq-static-lqr-control} is the same in both cases due to the separation principle.  Note that this thesis focuses on the static $\mathcal{H}_{2}$ problem (feedback regulator gains only).
 
 \subsection{Infinite-Horizon $\mathcal{H}_{\infty}$ Performance Criteria}
-For $\mathcal{H}_{\infty}$ optimal control, the objective is to find the control policy which minimizes the matrix norm of $\vb*{T}_{K}$, given by its maximum (frequency-dependent) singular value as
+For $\mathcal{H}_{\infty}$ optimal control, the objective is to find the control policy that minimizes the matrix norm of $\vb*{T}_{K}(z)$, given by its maximum (frequency-dependent) singular value as
 \begin{equation}
 \begin{aligned}
-	||\vb*{T}_{K}||_{\infty} &\triangleq \sup_{\omega \in \left[0, 2 \pi \right]} ||\vb*{T}_{K}(e^{j\omega})||
+	||\vb*{T}_{K}(z)||_{\infty} &:= \sup_{\omega \in \left[0, 2 \pi \right]} ||\vb*{T}_{K}(e^{j\omega})||
 	= \sup_{\omega \in \left[0, 2 \pi \right]} \bar{\sigma}(\vb*{T}_{K}(e^{j\omega}))
-	= \sup_{\vb*{w} \in L^{2}} \frac{||\vb*{z}||_{2}}{||\vb*{w}||_{2}}
+	= \sup_{\vb*{w} \in \ell^{2}} \frac{||\vb*{z}||_{2}}{||\vb*{w}||_{2}}
 \end{aligned} \label{hinf_norm_cost}
 \end{equation}
 
-This can be solved by iteratively solving the $\mathcal{H}_{\infty}$ sub-optimal control problem, which ensures $||\vb*{T}_{K}||_{\infty}$ is bounded by a scalar gain $\gamma$, i.e., $||\vb*{T}_{K}||_{\infty} \leq \gamma$.  By re-writing this inequality as $||\vb*{T}_{K}||_{2}^{2} \leq \gamma^{2}  ||\vb*{w}||_{2}^{2}$, it can be recast as an optimization problem of finding the smallest $\gamma \geq 0$ under which the cost function
+This can be solved by iteratively solving the $\mathcal{H}_{\infty}$ sub-optimal control problem, which ensures $||\vb*{T}_{K}(z)||_{\infty}$ is bounded by a scalar gain $\gamma$, i.e., $||\vb*{T}_{K}(z)||_{\infty} \leq \gamma$.  By re-writing this inequality as $||\vb*{T}_{K}(z)||_{2}^{2} \leq \gamma^{2}  ||\vb*{w}||_{2}^{2}$, it can be recast as an optimization problem of finding the smallest $\gamma \geq 0$ under which the cost function
 \begin{equation}
 \begin{aligned}
 	J_{\gamma} &= \lVert \vb*{z} \rVert_{2}^{2} - \gamma^{2} \lVert \vb*{w} \rVert_{2}^{2}
 	= J - \gamma^{2} \lVert \vb*{w} \rVert_{2}^{2} \label{eq-lq-cost-infinite-w}
 \end{aligned}
 \end{equation}
-where $J$ is given by Equation \eqref{T_mu_h2_norm}, is bounded by zero, which provides the $\mathcal{H}_{\infty}$ optimal solution.  Basar \cite{bacsar2008h} showed that solving the discrete generalized/game algebraic Riccati equation (DGARE)
+where $J$ is given by Equation \eqref{T_mu_h2_norm}, is bounded by zero, which provides the $\mathcal{H}_{\infty}$ optimal solution.  Ba{\c{s}}ar \cite{bacsar2008h} showed that solving the discrete generalized/game algebraic Riccati equation (DGARE)
 \begin{equation}
 \begin{aligned}
 	\vb*{P} &= \vb*{Q}_{x} + \vb*{A}^{T}\vb*{P}(\vb*{I}_{n_{x}}
@@ -320,7 +378,7 @@ A relatively brute-force method, based on bisection, determines the minimum $\ga
 The LQR/$\mathcal{H}_{2}$ solution can be obtained by setting $\gamma = \infty$, in which case Equation \eqref{eq-hinf-dgare} reduces to Equation \eqref{eq-lqr-dare} and Equation \eqref{eq-static-hinf-control} reduces to Equation \eqref{eq-static-lqr-control}.  Thus, both problems can be solved using the DGARE.  Numerical methods for solving discrete AREs are discussed in Appendix \ref{appendix:numericalMethods}.
 
 \section{Linear Matrix Inequalities}
-Many problems within engineering can be formulated as convex optimization problems \cite{boyd1990linear, boyd1994linear, balakrishnan1995connections, skogestad2005multivariable, liu2017survey}, in particular LMIs \cite{caverly2019lmi}, allowing both feasibility checks and optimal solutions to be obtained automatically using, e.g., interior-point methods.  An LMI is an optimization problem which can be written as the following semidefinite program (SDP)
+Many problems within engineering can be formulated as convex optimization problems \cite{boyd1990linear, boyd1994linear, balakrishnan1995connections, skogestad2005multivariable, liu2017survey}, in particular LMIs \cite{caverly2019lmi}, allowing both feasibility checks and optimal solutions to be obtained automatically using, e.g., interior-point methods.  An LMI is an optimization problem that can be written as the following semidefinite program (SDP)
 \begin{equation}
 \label{eq-generic-sdp}
 \begin{aligned}
@@ -331,14 +389,14 @@ Many problems within engineering can be formulated as convex optimization proble
 where $\vb*{c} \in \mathbb{R}^{m}$ is a vector of problem data and $\vb*{F}(\vb*{x})$ is a matrix equation specified using $m+1$ symmetric matrices $\vb*{F}_{0}, \vb*{F}_{1}, \vb*{F}_{2}, ... \vb*{F}_{m} \in \mathbb{R}^{m \times m}$
 \begin{equation}
 \begin{aligned}
-	\vb*{F}(\vb*{x}) \triangleq \vb*{F}_{0} + \vb*{x}_{1}\vb*{F}_{1} + \vb*{x}_{2}\vb*{F}_{2} ... + \vb*{x}_{m}\vb*{F}_{m}
+	\vb*{F}(\vb*{x}) := \vb*{F}_{0} + \vb*{x}_{1}\vb*{F}_{1} + \vb*{x}_{2}\vb*{F}_{2} ... + \vb*{x}_{m}\vb*{F}_{m}
 \end{aligned}
 \end{equation}
 
-A detailed literature survey of LMI properties, techniques, parsers, and solvers is provided by \cite{caverly2019lmi}, and for this work the two main results leveraged include Lyapunov stability and $\mathcal{H}_{2}$ norm minimization, for which data-driven equivalents exist.  Data-driven $\mathcal{H}_{\infty}$ LMIs were recently provided by \cite{berberich2020robust, berberich2022combining}, but due to time constraints were not included in this work.
+A detailed literature survey of LMI properties, techniques, parsers, and solvers is provided by \cite{caverly2019lmi}, and for this work, the two main results leveraged Lyapunov stability and $\mathcal{H}_{2}$ norm minimization, for which data-driven equivalents exist.  Data-driven $\mathcal{H}_{\infty}$ LMIs were recently provided by \cite{berberich2020robust, berberich2022combining}, but because of time constraints, they were not included in this work.
 
 \subsection{Closed-Loop Lyapunov Stability}
-Existence of a quadratic Lyapunov function is a necessary and sufficient condition for a stable linear system, and can be verified using an LMI provided by \cite{bernstein2009matrix,caverly2019lmi}.  For closed-loop system given by Equation \eqref{discrete_linear_plant_cl}, this implies the existence of two positive-definite matrices $\vb*{P} \in \mathbb{S}^{n_{x}}$, $\vb*{P} > \vb*{0}$ and $\vb*{Q} \in \mathbb{S}^{n_{x}}$, $\vb*{Q} > \vb*{0}$ which satisfy the discrete Lyapunov equation:
+Existence of a quadratic Lyapunov function is a necessary and sufficient condition for a stable linear system, which can be verified using an LMI provided by \cite{bernstein2009matrix,caverly2019lmi}.  For a closed-loop system given by Equation \eqref{discrete_linear_plant_cl}, this implies the existence of two positive-definite matrices, $\vb*{P} \in \mathbb{S}^{n_{x}}$, $\vb*{P} > \vb*{0}$ and $\vb*{Q} \in \mathbb{S}^{n_{x}}$, $\vb*{Q} > \vb*{0}$, which satisfy the discrete Lyapunov equation:
 \begin{equation}
 \label{eq-lyapunov}
 \begin{aligned}
@@ -366,9 +424,7 @@ which, using the Schur complement, can be represented as the LMI
 This can also be interpreted using the spectral radius; for a matrix $\tilde{\vb*{A}}$ and scalar $\delta$, $\rho(\tilde{\vb*{A}}) < \delta$ if there exists a matrix $\vb*{P}$ such that $\tilde{\vb*{A}}\vb*{P}\tilde{\vb*{A}}^{T} - \delta^{2}\vb*{P} < \vb*{0}$, which is equivalent to Equation \eqref{eq-lyapunov2} for $\tilde{\vb*{A}} = (\vb*{A} - \vb*{B}\vb*{K}_{b})$ and $\delta = 1$.  This ensures the closed-loop poles are stable.
 
 \subsection{Infinite-Horizon $\mathcal{H}_{2}$ Performance Criteria}
-Solving the LQR/$\mathcal{H}_{2}$ problem using Riccati equations is a well-understood technique leveraging the analytically known form of the solution and its gradient to compute the optimal control.  The problem can also be expressed as the solution to a more general constrained convex optimization problem, allowing other constraints to be more easily incorporated \cite{wang2014localized, anderson2019system}.
-
-It is well-known that for closed-loop system given by Equation \eqref{discrete_linear_plant_cl}, the cost function is quadratic.  This can be seen by expanding Equation \eqref{T_mu_h2_norm} using Equation \eqref{discrete_linear_performance_cl} to get
+Solving the LQR/$\mathcal{H}_{2}$ problem using Riccati equations is a well-understood technique leveraging the analytically known form of the solution and its gradient to compute the optimal control.  It is well-known that for closed-loop system given by Equation \eqref{discrete_linear_plant_cl}, the cost function is quadratic.  This can be seen by expanding Equation \eqref{T_mu_h2_norm} using Equation \eqref{discrete_linear_performance_cl} to get
 \begin{equation}
 \label{J_K_h2_cost}
 \begin{aligned}

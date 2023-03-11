@@ -48,28 +48,37 @@
 \nomenclature[37]{$\vb*{B}$}{discrete-time input mapping matrix of linear dynamical plant}
 \nomenclature[38]{$\vb*{D}$}{discrete-time disturbance mapping matrix of linear dynamical plant}
 
-\nomenclature[39]{DP}{dynamic programming}
-\nomenclature[40]{RL}{reinforcement learning}
-\nomenclature[41]{LQ}{linear quadratic}
-\nomenclature[42]{ARE}{algebraic Riccati equation}
-\nomenclature[43]{RDE}{Riccati differential equation}
-\nomenclature[44]{DARE}{discrete algebraic Riccati equation}
-\nomenclature[45]{GARE}{generalized (game) Riccati equation}
-\nomenclature[46]{DGARE}{discrete generalized (game) algebraic Riccati equation}
-\nomenclature[47]{DMD}{Dynamic Mode Decomposition}
-\nomenclature[48]{DMDc}{Dynamic Mode Decomposition with Control}
+\nomenclature[39]{$\vb*{T}(z)$}{generalized plant expressed as a transfer function matrix}
+\nomenclature[40]{$\vb*{T}_{11}(z)$}{intermediate transfer function from $\vb*{w}$ to $\vb*{z}$ associated with generalized plant $\vb*{T}(z)$}
+\nomenclature[41]{$\vb*{T}_{12}(z)$}{intermediate transfer function from $\vb*{w}$ to $\vb*{y}$ associated with generalized plant $\vb*{T}(z)$}
+\nomenclature[42]{$\vb*{T}_{21}(z)$}{intermediate transfer function from $\vb*{u}$ to $\vb*{y}$ associated with generalized plant $\vb*{T}(z)$}
+\nomenclature[43]{$\vb*{T}_{22}(z)$}{intermediate transfer function from $\vb*{u}$ to $\vb*{y}$ associated with generalized plant $\vb*{T}(z)$}
+\nomenclature[44]{$\vb*{K}(z)$}{control policy expressed as a transfer function matrix}
+\nomenclature[45]{$\mathcal{F}_{\ell}(\vb*{T}, \vb*{K})$}{lower linear fractional representation of $\vb*{T}(z)$ with respect to $\vb*{K}(z)$}
+\nomenclature[46]{$\mathcal{F}_{u}(\vb*{T}, \vb*{\Delta})$}{upper linear fractional representation of $\vb*{T}(z)$ with respect to $\vb*{\Delta}(z)$}
 
-\nomenclature[49]{LFR}{linear fractional representation}
-\nomenclature[50]{LFT}{linear fractional transformation}
-\nomenclature[51]{ULFT}{upper linear fractional transformation}
-\nomenclature[52]{LLFT}{lower linear fractional transformation}
+\nomenclature[47]{$\vb*{L}$}{loop transfer function; $\vb*{L}(z)$ in discrete time, $\vb*{L}(s)$ in continuous time}
+\nomenclature[48]{$\vb*{S}$}{sensitivity function $\vb*{S} = [\vb*{I} + \vb*{L}]^{-1}$}
+\nomenclature[49]{$\vb*{T}$}{complementary sensitivity function $\vb*{T} = \vb*{L}[\vb*{I} + \vb*{L}]^{-1}$}
 
-\nomenclature[53]{n.d.}{(of a matrix) negative definite}
-\nomenclature[54]{n.n.d.}{(of a matrix) nonnegative definite}
-\nomenclature[55]{p.d.}{(of a matrix) positive definite}
+\nomenclature[50]{DP}{dynamic programming}
+\nomenclature[51]{RL}{reinforcement learning}
+\nomenclature[52]{LQ}{linear quadratic}
+\nomenclature[53]{ARE}{algebraic Riccati equation}
+\nomenclature[54]{RDE}{Riccati differential equation}
+\nomenclature[55]{DARE}{discrete algebraic Riccati equation}
+\nomenclature[56]{GARE}{generalized (game) Riccati equation}
+\nomenclature[57]{DGARE}{discrete generalized (game) algebraic Riccati equation}
+\nomenclature[58]{DMD}{Dynamic Mode Decomposition}
+\nomenclature[59]{DMDc}{Dynamic Mode Decomposition with Control}
 
-\nomenclature[56]{$\vb*{L}$}{loop transfer function; $\vb*{L}(z)$ in discrete time, $\vb*{L}(s)$ in continuous time}
-\nomenclature[57]{$\vb*{S}$}{sensitivity function $\vb*{S} = [\vb*{I} + \vb*{L}]^{-1}$}
-\nomenclature[58]{$\vb*{T}$}{complementary sensitivity function $\vb*{T} = \vb*{L}[\vb*{I} + \vb*{L}]^{-1}$}
+\nomenclature[60]{LFR}{linear fractional representation}
+\nomenclature[61]{LFT}{linear fractional transformation}
+\nomenclature[62]{ULFT}{upper linear fractional transformation}
+\nomenclature[63]{LLFT}{lower linear fractional transformation}
+
+\nomenclature[64]{n.d.}{(of a matrix) negative definite}
+\nomenclature[65]{n.n.d.}{(of a matrix) nonnegative definite}
+\nomenclature[66]{p.d.}{(of a matrix) positive definite}
 
 \printnomenclature[1in]

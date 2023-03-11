@@ -9,7 +9,7 @@ This section illustrates the baseline performance of the nominal case study syst
 \subsection{Singular Values}
 The specific use of singular values in this context is to evaluate the $\mathcal{H}_{\infty}$ norm of the transfer function between disturbances/uncertainty and performance.  In all plots below, the magnitudes of worst-case ``disturbance gain'' is normalized (divided by) the respective minimax/optimal $\gamma^{*}$ as determined via $\mathcal{H}_{\infty}$ optimal control design.  Note that in decibels, this is equivalent to subtracting by $\gamma^{*}$.
 
-One pattern which emerged right away was that the $\mathcal{H}_{\infty}$ controller for $\gamma = \gamma^{*}$ results in a maximum singular value which is totally ``flat'' at $\gamma^{*}$.  While this is indeed optimal by definition, the resulting feedback system is extremely sensitive to variation in the feedback loop, in particular higher-frequency noise.  This phenomenon is not explicitly discussed in the game-theoretic treatment of $\mathcal{H}_{\infty}$ provided by \cite{bacsar2008h}, but may be understood qualitatively as being due to the ``waterbed effect'' (or, by Gunter Stein's ``dirt-shoveling'' analogy \cite{stein2003respect}).  Figure \ref{fig:waterbed_effect} shows the effect of incrementally larger values of $\gamma$ on the loop shape of the disturbance transfer function.  In particular, the controller begins to attenuate higher frequencies while maintaining a flat (albeit larger-magnitude) response to lower frequencies.
+One pattern which emerged right away was that the $\mathcal{H}_{\infty}$ controller for $\gamma = \gamma^{*}$ results in a maximum singular value which is totally ``flat'' at $\gamma^{*}$.  While this is indeed optimal by definition, the resulting feedback system is extremely sensitive to variation in the feedback loop, in particular higher-frequency noise.  This phenomenon is not explicitly discussed in the game-theoretic treatment of $\mathcal{H}_{\infty}$ provided by \cite{bacsar2008h}, but it may be understood qualitatively using the ``waterbed effect'' (or by Gunter Stein's ``dirt-shoveling'' analogy \cite{stein2003respect}).  Figure \ref{fig:waterbed_effect} shows the effect of incrementally increasing values of $\gamma$ on the loop shape of the disturbance transfer function.  In particular, the controller begins to attenuate higher frequencies while maintaining a flat (albeit larger-magnitude) response to lower frequencies.
 
 With this observation and some trial-and-error tuning, a fudge factor of 50\% was determined as an acceptable relaxation of the original $\mathcal{H}_{\infty}$ problem.  This means that, for design purposes, $\gamma = 1.5\gamma^{*}$ (or, in decibels, $\gamma_{dB} = \gamma^{*}_{dB}$ + 3.52 dB).  These are shown in the bottom-most row of Figure \ref{fig:waterbed_effect}.  While this design is conservative, the extra attenuation at higher frequencies plays a role in helping to smooth out the effect of unfiltered measurement noise.  Traditional frequency-domain approaches to $\mathcal{H}_{\infty}$ design may have achieved this by lumping frequency-dependent weights into the plant model in order to shape the loop.  However, the fudge factor approach was simplest in the context of this work.
 
@@ -31,8 +31,9 @@ Figure \ref{fig:baseline_singular_values} shows the resulting nominal shape of t
 \end{figure}
 
 \subsection{Stability Margins}
-One way to express robustness of a feedback system to gain or phase variations is the disk margin \cite{seiler2020introduction}, a scalar quantity which represents how much uncertainty the loop can tolerate before going unstable.  When used for control tuning, disk-based stability margins provide stronger guarantees of robustness than classical gain/phase margins since they take into account the interactions of all loops and frequencies.  In this work, disk-based margins for simultaneous input/output perturbations are computed using MATLAB's \texttt{diskmargin} routine from its Robust Control Toolbox, using the known open-loop plant and a given set of feedback gains.  The margins for the baseline systems are listed in Table \ref{table:baseline_disk_margins}.
+One way to express robustness of a feedback system to gain or phase variations is the disk margin \cite{seiler2020introduction}, a scalar quantity which represents how much uncertainty the loop can tolerate before going unstable.  When used for control tuning, disk-based stability margins provide stronger guarantees of robustness than classical gain/phase margins since they take into account the interactions of all loops and frequencies.  In this work, disk-based margins for simultaneous input/output perturbations are computed using MATLAB's \texttt{diskmargin} routine from its Robust Control Toolbox with the known open-loop plant and a given set of feedback gains.  The margins for the baseline systems are listed in Table \ref{table:baseline_disk_margins}.
 \begin{table}[H]
+\caption{Disk-based stability margins of baseline $\mathcal{H}_{2}$ and $\mathcal{H}_{\infty}$ feedback systems.}
 \centering
 \begin{tabular}{| l || c | c | c |} 
 	\hline
@@ -43,12 +44,11 @@ One way to express robustness of a feedback system to gain or phase variations i
 	Baseline $\mathcal{H}_{\infty}$ & 1.119 & 0.601 & 0.678\\
 	\hline
 \end{tabular}
-\caption{Disk-based stability margins of baseline $\mathcal{H}_{2}$ and $\mathcal{H}_{\infty}$ feedback systems.}
 \label{table:baseline_disk_margins}
 \end{table}
 
 \subsection{Transient Responses}
-Figures \ref{fig:baseline_transient_double_integrator}, \ref{fig:baseline_transient_cart_pole} and \ref{fig:baseline_transient_robot_arm} show the transient responses of the three case study systems with the baseline $\mathcal{H}_{2}$ and $\mathcal{H}_{\infty}$ controllers.  The initial conditions of each system are selected to simulate the type of transient response in error dynamics which would immediately follow a closed-loop setpoint command, when the system is already in a stable state (zero velocity or rates).  For the double integrator, this simply means moving the system (e.g. the cart) to another position.  The cart pole moves the system to another position while also stabilizing the pole back to being upright.  The robot arm (without gravity) would similarly be moving from one angular position to another.
+Figures \ref{fig:baseline_transient_double_integrator}, \ref{fig:baseline_transient_cart_pole} and \ref{fig:baseline_transient_robot_arm} show the transient responses of the three case study systems with the baseline $\mathcal{H}_{2}$ and $\mathcal{H}_{\infty}$ controllers.  The initial conditions of each system are selected to simulate the type of transient response in error dynamics that would immediately follow a closed-loop setpoint command, when the system is already in a stable state (zero velocity or rates).  For the double integrator, this simply means moving the system (e.g. the cart) to another position.  The cart pole moves the system to another position while also stabilizing the pole back to being upright.  The robot arm (without gravity) would similarly be moving from one angular position to another.
 
 \begin{figure}[H]
 \centering
@@ -91,11 +91,11 @@ Figures \ref{fig:baseline_integrated_cost} shows the total integrated cost and c
 \label{sect:results:testapproach}
 To test the effect of uncertainty and noise on both indirect and direct data-driven control, a repeated-trial test is used to evaluate each case study.  There are two test scenarios: learning to control a system with parameter uncertainty, and learning to control a system with measurement noise.  It is expected that while measurement noise should have no effect on the ability to compute baseline control designs, it will certainly affect the efficacy of learning controllers from data, and may affect the performance of both types when simulated.
 
-For a separate sweep of each of the two scale factors (from 0\% to 60\%), 100 different test runs are evaluated for different data-driven control methods, to compare to baseline model-based control methods.  Each run gathers a finite trajectory of training data from the fully-nonlinear plant, and using this data several data-driven controllers are computed.  If they are stable, their robustness metrics are compared to the baseline case.
+For a separate sweep of each of the two scale factors (from 0\% to 60\%), 100 different test runs are evaluated for different data-driven control methods in order to compare to baseline model-based control methods.  Each run gathers a finite trajectory of training data from the fully-nonlinear plant, and using this data, several data-driven controllers are computed.  If they are stable, their robustness metrics are compared to the baseline case.
 
-Indirect approaches use the DMDc algorithm given by Equation \eqref{eq:dmdc_solution} to estimate a linear discrete-time plant model from the training data, followed by model-based $\mathcal{H}_{2}$ and (suboptimal) $\mathcal{H}_{\infty}$ control.  Direct approaches implement the LMIs given by Equations \eqref{eq:h2_lmi_dd} and \eqref{eq:h2s_lmi_dd} which solve model-free optimizations for $\mathcal{H}_{2}$ optimal and $\mathcal{H}_{2}$ suboptimal control, respectively.  These leverage the MATLAB-based CVX parser \cite{grant2008graph, grant2008cvx} with its default SDPT3 \cite{toh1999sdpt3, tutuncu2001sdpt3} and SeDuMi \cite{sturm1999using} SDP solvers.
+Indirect approaches use the DMDc algorithm given by Equation \eqref{eq:dmdc_solution} to estimate a linear discrete-time plant model from the training data, followed by model-based $\mathcal{H}_{2}$ and (suboptimal) $\mathcal{H}_{\infty}$ control.  Direct approaches implement the LMIs given by Equations \eqref{eq:h2_lmi_dd} and \eqref{eq:h2s_lmi_dd} that solve model-free optimizations for $\mathcal{H}_{2}$ optimal and $\mathcal{H}_{2}$ suboptimal control, respectively.  These leverage the MATLAB-based CVX parser \cite{grant2008graph, grant2008cvx} with its default SDPT3 \cite{toh1999sdpt3, tutuncu2001sdpt3} and SeDuMi \cite{sturm1999using} SDP solvers.
 
-For a given scale factor, several metrics are computed and averaged across the 100 test runs.  The first metric is the fraction of stabilizing data-driven controllers; those which do not keep the system poles within the unit circle are marked as unstable.  For those which are stable, the closed-loop disk margin (see Appendix \ref{appendix:sensitivity}) and $\mathcal{H}_{\infty}$ norms are compared to characterize the robustness of the controllers synthesized from data.
+For a given scale factor, several metrics are computed and averaged across the 100 test runs.  The first metric is the fraction of stabilizing data-driven controllers; those that do not keep the system poles within the unit circle are marked as unstable.  For those that are stable, the closed-loop disk margin (see Appendix \ref{appendix:sensitivity}) and $\mathcal{H}_{\infty}$ norms are compared to characterize the robustness of the controllers synthesized from data.
 
 Additionally, the full feedback system is then simulated with fixed duration and initial conditions to obtain integrated control effort and LQ cost, to characterize performance.  However, those whose integrated metrics or $\mathcal{H}_{\infty}$ norms are disproportionately large (at least 10 times above the average) are marked unstable and their metrics are discarded.
 
@@ -110,6 +110,7 @@ Table \ref{table:training_policies} summarizes the control policies used to gath
 \end{equation}
 and the values of $\vb*{K}_{0}$ were selected heuristically.   These merely keep the closed-loop system stable, and are generally not optimized for robustness or performance.
 \begin{table}[H]
+\caption{Control policies used to gather training data.}
 \centering
 \begin{tabular}{|c || c | c | c|} 
 	\hline
@@ -123,7 +124,6 @@ and the values of $\vb*{K}_{0}$ were selected heuristically.   These merely keep
 		10\exp(-0.8t_{k})\sin(t_{k}) + \mathcal{N}(0, 0.05)\\ 10\exp(-0.8t_{k})\sin(t_{k}) + \mathcal{N}(0, 0.05) \end{bmatrix}$ & 150\\
 	\hline
 \end{tabular}
-\caption{Control policies used to gather training data.}
 \label{table:training_policies}
 \end{table}
 
@@ -148,12 +148,12 @@ Here, a single inertial parameter from each case study system was selected to be
 			\State \hspace{10pt} $\vb*{K}_{2}^{i} \gets $ indirect $\mathcal{H}_{2}$ synthesis
 			\State \hspace{10pt} $\vb*{K}_{2}^{d} \gets $ direct $\mathcal{H}_{2}$ synthesis
 			\State \hspace{10pt} $\vb*{K}_{\infty}^{i} \gets $ indirect $\mathcal{H}_{\infty}$ synthesis
-			\For{$\vb*{K}$ in $\begin{bmatrix} \vb*{K}_{2}^{b}, & \vb*{K}_{\infty}^{b}, & \vb*{K}_{2}^{i}, & \vb*{K}_{2}^{d}, & \vb*{K}_{\infty}^{i} \end{bmatrix}$}
+			\For{$\tilde{\vb*{K}}$ in $\begin{bmatrix} \vb*{K}_{2}^{b}, & \vb*{K}_{\infty}^{b}, & \vb*{K}_{2}^{i}, & \vb*{K}_{2}^{d}, & \vb*{K}_{\infty}^{i} \end{bmatrix}$}
 				\State Use off-nominal plant to compute closed-loop stability of $(\vb*{A} - \vb*{B}\vb*{K})$.
 				\If{stable}
 					\State Compute disk margin using sensitivity function $(\vb*{S} - \vb*{T})/2$.
-					\State Compute $\mathcal{H}_{\infty}$ norm using generalized plant $\vb*{T}_{K}$.
-					\State Simulate full system with $\vb*{u}_{k} = -\vb*{K}\vb*{x}_{k}$, from initial conditions $(\vb*{x}_{0},\vb*{u}_{0})$.
+					\State Compute $\mathcal{H}_{\infty}$ norm using generalized plant $\vb*{T}_{K}(z)$.
+					\State Simulate full system with $\vb*{u}_{k} = -\tilde{\vb*{K}}\vb*{x}_{k}$, from initial conditions $(\vb*{x}_{0},\vb*{u}_{0})$.
 					\State Compute total integrated control effort and total integrated LQ cost.
 				\Else
 					\State Test failed; discard and set all metrics to NaN.
@@ -184,12 +184,12 @@ Here, a rough estimate of nominal variance was assumed for each system.  This wa
 			\State \hspace{10pt} $\vb*{K}_{2}^{i} \gets $ indirect $\mathcal{H}_{2}$ synthesis
 			\State \hspace{10pt} $\vb*{K}_{2}^{d} \gets $ direct $\mathcal{H}_{2}$ synthesis
 			\State \hspace{10pt} $\vb*{K}_{\infty}^{i} \gets $ indirect $\mathcal{H}_{\infty}$ synthesis
-			\For{$\vb*{K}$ in $\begin{bmatrix} \vb*{K}_{2}^{b}, & \vb*{K}_{\infty}^{b}, & \vb*{K}_{2}^{i}, & \vb*{K}_{2}^{d}, & \vb*{K}_{\infty}^{i} \end{bmatrix}$}
+			\For{$\tilde{\vb*{K}}$ in $\begin{bmatrix} \vb*{K}_{2}^{b}, & \vb*{K}_{\infty}^{b}, & \vb*{K}_{2}^{i}, & \vb*{K}_{2}^{d}, & \vb*{K}_{\infty}^{i} \end{bmatrix}$}
 				\State Use nominal plant to compute closed-loop stability of $(\vb*{A} - \vb*{B}\vb*{K})$.
 				\If{stable}
 					\State Compute disk margin using sensitivity function $(\vb*{S} - \vb*{T})/2$.
-					\State Compute $\mathcal{H}_{\infty}$ norm using generalized plant $\vb*{T}_{K}$.
-					\State Simulate full system with $\vb*{u}_{k} = -\vb*{K}\vb*{x}_{k}$, from initial conditions $(\vb*{x}_{0},\vb*{u}_{0})$.
+					\State Compute $\mathcal{H}_{\infty}$ norm using generalized plant $\vb*{T}_{K}(z)$.
+					\State Simulate full system with $\vb*{u}_{k} = -\tilde{\vb*{K}}\vb*{x}_{k}$, from initial conditions $(\vb*{x}_{0},\vb*{u}_{0})$.
 					\State Compute total integrated control effort and total integrated LQ cost.
 				\Else
 					\State Test failed; discard and set all metrics to NaN.

@@ -1,6 +1,6 @@
 \chapter{Modeling and Simulation}
 \label{chap:model}
-This chapter describes the mathematical modeling of case study dynamical systems used to evaluate data-driven control.  The case studies are well-known examples from introductory controls courses which fit neatly within the modeling framework typically used for robotics \cite{sciavicco2001modelling, spong2008robot,slotineli}.  However, it should be emphasized that this is not a thesis on robot control - rather, case studies were chosen which have increasingly nonlinear dynamics, in order to more effectively simulate the type of time-correlated uncertainty arising from linearization error.  This framework allows nonlinear plant models to be derived easily using Lagrangian dynamics (see Appendix \ref{appendix:modeling} for full derivations) and linearization to be performed analytically.  For each case study, all states are defined as relative to a static equilibrium which the control maintains using a linearized representation of the system.
+This chapter describes the mathematical modeling of dynamical systems used as case studies to evaluate data-driven control.  The case studies are well-known examples from introductory controls courses that fit neatly within the modeling framework typically used for robotics \cite{slotineli, sciavicco2001modelling, spong2008robot}.  However, it should be emphasized that this is not a thesis on robot control - rather, case studies were chosen that have increasingly nonlinear dynamics, in order to more effectively simulate the type of time-correlated uncertainty arising from linearization error.  Moreover, this framework allows nonlinear plant models to be derived easily using Lagrangian dynamics (see Appendix \ref{appendix:modeling} for full derivations) and linearization to be performed analytically.  For each case study, all states are defined as relative to a static equilibrium that the controller maintains using a linearized representation of the system.
 
 \section{Manipulator Equation and Lagrangian Dynamics}
 The nonlinear dynamic equations for the rigid-body motion of an $m$-link robotic manipulator take the form of $m$ coupled differential equations, expressed in matrix form as
@@ -27,7 +27,8 @@ Systems described by Equation \eqref{manipulator_eqn} can be simulated using the
 	\ddot{\vb*{q}} &= -\vb*{M}(\vb*{q})^{-1}\big{(}\vb{C}(\vb*{q}, \dot{\vb*{q}})\dot{\vb*{q}} - \vb*{g}(\vb*{q}) - \vb*{\tau}\big{)}
 \end{aligned}
 \end{equation}
-and by defining the state vector $\vb*{x}(t) = \begin{bmatrix} \vb*{q}(t), & \vb*{\dot{q}}(t) \end{bmatrix}^{T}$ and controlled input vector such that $\vb*{\tau}(t) = \vb*{B}_{\tau}\vb*{u}(t)$, Equation \eqref{manipulator_ode} can simulated using nonlinear plant model
+
+Defining the state vector $\vb*{x}(t) = \begin{bmatrix} \vb*{q}(t), & \vb*{\dot{q}}(t) \end{bmatrix}^{T}$ and controlled input vector such that $\vb*{\tau}(t) = \vb*{B}_{\tau}\vb*{u}(t)$, Equation \eqref{manipulator_ode} is augmented with kinematics to produce the nonlinear plant
 \begin{equation}
 \label{nonlinear_plant}
 \begin{aligned}
@@ -39,7 +40,7 @@ and by defining the state vector $\vb*{x}(t) = \begin{bmatrix} \vb*{q}(t), & \vb
 \end{aligned}
 \end{equation}
 
-For nonlinear simulation, Equation \eqref{nonlinear_plant} is propagated forward using a fixed-rate ODE solver from a given initial state $\vb*{x}_{0}$ and input $\vb*{u}_{0}$.  Its output, sampled at a pre-configured rate, is then subjected to additive zero-mean Gaussian noise.
+For a nonlinear simulation, Equation \eqref{nonlinear_plant} is propagated forward using an ODE solver from a given initial state $\vb*{x}_{0}$ and input $\vb*{u}_{0}$.  Its output is sampled at a pre-configured rate and used for feedback control.  If desired, additive zero-mean Gaussian noise is superimposed onto the discretized outputs to simulate measurement perturbations.
 
 \subsection{Linearization for Control Design}
 For stability analysis, linearization of Equation \eqref{nonlinear_plant} is taken about a fixed point where $\vb*{q} = 0$ and $\vb*{\dot{q}} = 0$ and small angle approximations are assumed.  This results in the following continuous-time state-space model
@@ -68,11 +69,11 @@ where $\vb*{\Delta}(t)$ is a disturbance term representing parameter uncertainty
 
 \subsection{Disturbance Modeling}
 \label{sect:disturbance_modeling}
-Classical small-gain approaches to robust control treat $\vb*{\Delta}$ as a stable, norm-bounded transfer function which is to be tolerated and stabilized by choice of an appropriately-chosen norm-bound $\gamma$.  However, without accurate disturbance models it is well-known that this approach can produce overly conservative control designs.
+Classical small-gain approaches to robust control treat $\vb*{\Delta}$ as a stable, norm-bounded transfer function that is guaranteed not to destabilize the feedback loop by choice of an appropriately-chosen norm-bound $\gamma$.  However, without accurate disturbance models, it is well-known that this approach can produce overly conservative control designs.
 
-Other approaches may instead utilize specific \emph{a priori} knowledge of the structure of the plant dynamics and which specific parameters (or exogenous inputs) are expected to change unpredictably.  These allow the algebraic separation of known terms and uncertain terms in the plant model, to derive an approximate expression for $\vb*{\Delta}(t)$ which is amenable to control design.  Ideally, this is linearly maps a norm-bounded disturbance input $\vb*{w}(t)$.
+Other approaches may instead utilize specific \emph{a priori} knowledge of the structure of the plant dynamics and which specific parameters (or exogenous inputs) are expected to change unpredictably.  Knowledge of the uncertainty's structure allows the designer to algebraically separate known terms from uncertain terms in the plant model, to derive an approximate expression for $\vb*{\Delta}(t)$ that is amenable to control design.  Ideally, this linearly maps a norm-bounded disturbance input $\vb*{w}(t)$.
 
-The approach taken in this work will utilize some structure of Equation \eqref{fixed_point_linearization}, but will not assume any specific knowledge of the internal plant structure.  This is done to evaluate the data-driven control in a context that is closer to ``model-free'' context, although not completely so due to the assumption of a known disturbance input mapping matrix $\vb*{D}$.  The data-driven control approaches evaluated in this work could be interpreted as a fine-tuning or further optimization of a partially-uncertain model.  Incorporating model knowledge into robust data-driven control and determining how best to utilize the training data is a topic with many subtle complexities, and is decidedly out of scope for the analyses considered here.
+The approach taken in this work will utilize some structure of Equation \eqref{fixed_point_linearization}, but it will not assume any specific knowledge of the internal plant structure.  This is done to evaluate the data-driven control in a context that is closer to ``model-free'' context, although not completely because of the assumption of a known disturbance input mapping matrix $\vb*{D}$.  The data-driven control approaches evaluated in this work could be interpreted as a fine-tuning or further optimization of a partially-uncertain model.  Incorporating model knowledge into robust data-driven control and determining how best to utilize the training data is a topic with many subtle complexities, and it is decidedly out of scope for the analyses considered here.
 
 \subsubsection{Continuous-Time Disturbances}
 The structure of Equation \eqref{fixed_point_linearization1} implies that continuous-time disturbances primarily affect the ``lower block'' (dynamic) portion of the model, since the ``upper block'' is just kinematics.  Thus, 
@@ -97,7 +98,7 @@ and for simplicity, the matrix $\vb*{\Delta}_{l}$ is taken to be $\vb*{I}$.  Wit
 which is a linear system with two inputs.
 
 \subsubsection{Discrete-Time Disturbances}
-Grouping $\vb*{u}(t)$ and $\vb*{w}(t)$ together, as well as $\vb*{B}_{c}$ and $\vb*{D}_{c}$, the model specified in Equation \eqref{fixed_point_linearization} is then discretized according to the control system sample rate, assuming a zero-order-hold (ZOH) on the both inputs.  The resulting model is
+Grouping $\vb*{u}(t)$ and $\vb*{w}(t)$ together, as well as $\vb*{B}_{c}$ and $\vb*{D}_{c}$, the model specified in Equation \eqref{fixed_point_linearization} is then discretized according to the control system sample rate, assuming a zero-order-hold (ZOH) on both inputs.  The resulting model is
 \begin{equation}
 \label{fixed_point_linearization_discrete}
 \begin{aligned}
@@ -105,9 +106,10 @@ Grouping $\vb*{u}(t)$ and $\vb*{w}(t)$ together, as well as $\vb*{B}_{c}$ and $\
 \end{aligned}
 \end{equation}
 
-Lastly, although the control synthesis techniques utilized in this work do not incorporate noise perturbations explicitly into their regulator performance cost, the effect of a scalar lumped disturbance is added to the discretized model, in a way that scales to each state based on an \emph{a priori} guess of the expected maximum noise power.  The final disturbance input mapping matrix $\vb{D}$ is calculated by concatenating $\tilde{\vb*{D}}$ with a column vector $\vb*{d}$ of the chosen scaling terms of the lumped disturbance, i.e., $\vb*{D} = \begin{bmatrix} \tilde{\vb*{D}} & \vb*{d} \end{bmatrix}$.  The resulting discrete-time model is in the ``generalized plant'' form used for robust control given by Equation \eqref{discrete_linear_plant}.  Table \ref{table:max_noise} lists the maximum noise power used to determine the scaling $\vb*{d}$ vector.  Note that these are somewhat exaggerated and it is more likely that the noise seen on plant outputs may be filtered and/or processed by a state estimator.
+Lastly, although the control synthesis techniques utilized in this work do not incorporate noise perturbations explicitly into their regulator performance cost, the effect of a scalar lumped disturbance is added to the discretized model, in a way that scales to each state based on an \emph{a priori} guess of the expected maximum noise power.  The final disturbance input mapping matrix $\vb{D}$ is calculated by concatenating $\tilde{\vb*{D}}$ with a column vector $\vb*{d}$ of the chosen scaling terms of the lumped disturbance, i.e., $\vb*{D} = \begin{bmatrix} \tilde{\vb*{D}} & \vb*{d} \end{bmatrix}$.  The resulting discrete-time model is in the ``generalized plant'' form used for robust control given by Equation \eqref{discrete_linear_plant}.  Table \ref{table:max_noise} lists the maximum noise power used to determine the scaling $\vb*{d}$ vector.  Note that these are somewhat exaggerated, and it is more likely that the noise seen on plant outputs may be filtered and/or processed by a state estimator.
 \begin{table}[H]
 \centering
+\caption{Maximum noise power for different types of measurements.}
 \begin{tabular}{|c||c|c|}
 	\hline
 	\textbf{Type} & \multicolumn{2}{c|}{\textbf{Maximum Noise Power}}\\
@@ -121,7 +123,6 @@ Lastly, although the control synthesis techniques utilized in this work do not i
 	Angular Rate & 0.01 deg$^{2}$s$^{-2}$ &  0.000175 rad$^{2}$s$^{-2}$\\
 	\hline
 \end{tabular}
-\caption{Maximum noise power for different types of measurements.}
 \label{table:max_noise}
 \end{table}
 
@@ -493,7 +494,7 @@ is discretized along with the continuous-time input mapping matrix, then horizon
 \end{equation*}
 
 \subsection{Two-Link Robot Arm}
-The two-link robot arm is a nonlinear, trajectory controllable mechanical system which models locomotion of an arm.  It has two links (``arm'' and ``forearm''), each with masses $m_{1}$, $m_{2}$ and lengths $l_{1}$, $l_{2}$, respectively.  For simplicity, rotational inertia of the links are ignored and both masses are taken to be concentrated at the ends of the links.  Both joints (``shoulder'' and ``elbow'') can be torqued arbitrarily to control angular offsets and rates.  The states of this system are the two joints' angular offsets $\theta_{2}(t)$, $\theta_{2}(t)$ and rates $\dot{\theta}_{1}(t)$, $\dot{\theta}_{2}(t)$ and the inputs are torques $\tau_{1}$, $\tau_{2}$.  Appendix \ref{appendix:modeling:robotarm} contains the full derivation of the nonlinear motion model using Lagrangian dynamics.  The end result is the following two equations of motion:
+The two-link robot arm is a nonlinear, trajectory controllable mechanical system which models locomotion of an arm.  It has two links (``arm'' and ``forearm''), each with masses $m_{1}$, $m_{2}$ and lengths $l_{1}$, $l_{2}$, respectively.  For simplicity, rotational inertia of the links are ignored and both masses are taken to be concentrated at the ends of the links.  Both joints (``shoulder'' and ``elbow'') can be torqued arbitrarily to control angular offsets and rates.  The states of this system are the two joints' angular offsets $\theta_{1}(t)$, $\theta_{2}(t)$ and rates $\dot{\theta}_{1}(t)$, $\dot{\theta}_{2}(t)$, and the inputs are torques $\tau_{1}$, $\tau_{2}$.  Appendix \ref{appendix:modeling:robotarm} contains the full derivation of the nonlinear motion model using Lagrangian dynamics.  The end result is the following two equations of motion:
 \begin{subequations}
 \begin{align}
 \begin{split}
@@ -577,7 +578,7 @@ where
 \end{align}
 \end{subequations}
 
-Note that, due to affine terms $c_{31}$ and $c_{41}$, a feedforward control term is required for stabilization.  This so-called ``gravity feedforward'' technique is standard in classical (fully-actuated) robotics for setpoint regulation.  However, to simplify the analyses and allow the robot arm to be stabilized using state feedback like the other case studies, a further simplification was made by setting $g = 0$ m/s$^{2}$, which implies $a_{31} = a_{41} = c_{31} = c_{41} = 0$.
+Note that, because of the affine terms $c_{31}$ and $c_{41}$, a feedforward control term is required for stabilization.  This so-called ``gravity feedforward'' technique is standard in classical (fully-actuated) robotics for setpoint regulation.  However, to simplify the analyses and allow the robot arm to be stabilized using state feedback like the other case studies, a further simplification was made by setting $g = 0$ m/s$^{2}$, which implies $a_{31} = a_{41} = c_{31} = c_{41} = 0$.
 
 The nominal parameters are $g = 0$ m/s$^{2}$, $m_{1} = 5$ kg, $l_{1} = 5$ m, $m_{2} = 2.5$ kg, $l_{2} = 5$ m, and $\Delta t = 0.1$s, the LQ cost weight matrices were determined heuristically after trial-and-error tests with the nominal model.  Like the cart pole, linearization error accrues quickly as the both angles deviate from zero.  The final cost weights reflect the desire to minimize this effect, and are given by
 \begin{equation*}
@@ -591,7 +592,7 @@ The nominal parameters are $g = 0$ m/s$^{2}$, $m_{1} = 5$ kg, $l_{1} = 5$ m, $m_
     \vb*{R}_{u} = \begin{bmatrix}
         1 & 0\\
         0 & 1\\
-    \end{bmatrix}
+    \end{bmatrix},
 \end{aligned}
 \end{equation*}
 and the resulting discrete plant matrices are

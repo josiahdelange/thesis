@@ -11,25 +11,21 @@ The following derivations are based primarily on Chapter 3, Section 7 (\emph{Dis
 \end{aligned} \label{hamiltonian}
 \end{equation}
 and necessary conditions for optimality
+\vspace{-12pt}
 \begin{subequations}
 \begin{align}
-	%
 	\vb*{x}_{k+1} &= \nabla_{\vb*{\lambda}_{k+1}} \vb*{H}_{k}
 		= \vb*{A}\vb*{x}_{k} + \vb*{B}\vb*{u}_{k} + \vb*{D}\vb*{w}_{k}\\
-	%
 	\vb*{\lambda}_{k} &= (\nabla_{\vb*{x}_{k}} \vb*{H}_{k})^{T}
 		= \vb*{Q}_{x}\vb*{x}_{k} +  \vb*{A}^{T}\vb*{\lambda}_{k+1}
 		= \vb*{P}_{\gamma,k} \vb*{x}_{k}\\
-	%
 	\vb*{0} &= \nabla_{\vb*{u}_{k}} \vb*{H}_{k}
 		= \vb*{R}_{u}\vb*{u}_{k} +  \vb*{B}^{T}\vb*{\lambda}_{k+1}\\
-	%
 	\vb*{0} &= \nabla_{\vb*{w}_{k}} \vb*{H}_{k}
 		= - \gamma^{2} \vb*{w}_{k} +  \vb*{D}^{T}\vb*{\lambda}_{k+1}
 \end{align} \label{conditions_for_optimality}
-\end{subequations}
-
-The optimal control is $\vb*{u}_{k} = -\vb*{R}_{u}^{-1} \vb*{B}^{T} \vb*{\lambda}_{k+1}$ and the worst-case disturbance is $\vb*{w}_{k} = \gamma^{-2} \vb*{D}^{T} \vb*{\lambda}_{k+1}$.  Rearranging the state equation for $\vb*{x}_{k}$ and plugging in the expressions for $\vb*{u}_{k}$ and $\vb*{w}_{k}$ yields
+\end{subequations}\vspace{-30pt}\\
+The optimal control is $\vb*{u}_{k} = -\vb*{R}_{u}^{-1} \vb*{B}^{T} \vb*{\lambda}_{k+1}$, and the worst-case disturbance is $\vb*{w}_{k} = \gamma^{-2} \vb*{D}^{T} \vb*{\lambda}_{k+1}$.  Rearranging the state equation for $\vb*{x}_{k}$ and plugging in the expressions for $\vb*{u}_{k}$ and $\vb*{w}_{k}$ yields
 \begin{equation}
 \begin{aligned}
 	\vb*{A}\vb*{x}_{k} &= \vb*{x}_{k+1} - \vb*{B}\vb*{u}_{k} - \vb*{D}\vb*{w}_{k}\\
@@ -77,8 +73,8 @@ Together, these yield a system of equations for $\vb*{x}_{k}$ and $\vb*{\lambda}
 		\vb*{\lambda}_{k+1}
 	\end{bmatrix} =
 	\begin{bmatrix}
-		\Psi_{11} & \Psi_{12}\\
-		\Psi_{21} & \Psi_{22}\\
+		\vb*{\Psi}_{11} & \vb*{\Psi}_{12}\\
+		\vb*{\Psi}_{21} & \vb*{\Psi}_{22}\\
 	\end{bmatrix}
 	\begin{bmatrix}
 		\vb*{x}_{k+1}\\ 
@@ -95,20 +91,20 @@ The Eigenvector Method (a.k.a. Vaughan's method) is provided in \cite{vaughan197
 \begin{aligned}
 	\vb*{\Psi} &=
 	\begin{bmatrix}
-		E_{11} & E_{12}\\
-		E_{21} & E_{22}\\
+		\vb*{E}_{11} & \vb*{E}_{12}\\
+		\vb*{E}_{21} & \vb*{E}_{22}\\
 	\end{bmatrix}
 	\begin{bmatrix}
-		\Lambda & 0\\
-		0 & \Lambda^{-1}\\
+		\vb*{\Lambda} & \vb*{0}\\
+		\vb*{0} & \vb*{\Lambda}^{-1}\\
 	\end{bmatrix}
 	\begin{bmatrix}
-		E_{11} & E_{12}\\
-		E_{21} & E_{22}\\
+		\vb*{E}_{11} & \vb*{E}_{12}\\
+		\vb*{E}_{21} & \vb*{E}_{22}\\
 	\end{bmatrix}^{-1}
 \end{aligned}
 \end{equation}
-which allows the non-iterative computation of $\vb*{P}_{\gamma} = E_{21}E_{11}^{-1}$.
+which allows the non-iterative computation of $\vb*{P}_{\gamma} = \vb*{E}_{21}\vb*{E}_{11}^{-1}$.
 
 \section{Schur Method}
 \label{appendix:numerical:schur}
@@ -116,24 +112,24 @@ The Schur Method (a.k.a. Laub's method) provided in \cite{laub1979schur} is a va
 \begin{equation}
 \begin{aligned}
 	\begin{bmatrix}
-		U_{11} & U_{12}\\
-		U_{21} & U_{22}\\
+		\vb*{U}_{11} & \vb*{U}_{12}\\
+		\vb*{U}_{21} & \vb*{U}_{22}\\
 	\end{bmatrix}^{T}
 	\begin{bmatrix}
-		\Psi_{11} & \Psi_{12}\\
-		\Psi_{21} & \Psi_{22}\\
+		\vb*{\Psi}_{11} & \vb*{\Psi}_{12}\\
+		\vb*{\Psi}_{21} & \vb*{\Psi}_{22}\\
 	\end{bmatrix}
 	\begin{bmatrix}
-		U_{11} & U_{12}\\
-		U_{21} & U_{22}\\
+		\vb*{U}_{11} & \vb*{U}_{12}\\
+		\vb*{U}_{21} & \vb*{U}_{22}\\
 	\end{bmatrix} &=
 	\begin{bmatrix}
-		\Lambda_{11} & \Lambda_{12}\\
-		0 & \Lambda_{22}\\
+		\vb*{\Lambda}_{11} & \vb*{\Lambda}_{12}\\
+		\vb*{0} & \vb*{\Lambda}_{22}\\
 	\end{bmatrix}
 \end{aligned}
 \end{equation}
-which allows the non-iterative computation of $\vb*{P}_{\gamma} = U_{21}U_{11}^{-1}$.  Due to its underlying use of the QR decomposition, the Schur Method is considered numerically preferable to the Eigenvector Method in terms of speed and sensitivity to multiple eigenvalues.
+which allows the non-iterative computation of $\vb*{P}_{\gamma} = \vb*{U}_{21}\vb*{U}_{11}^{-1}$.  Due to its underlying use of the QR decomposition, the Schur Method is considered numerically preferable to the Eigenvector Method in terms of speed and sensitivity to multiple eigenvalues.
 
 \section{Iterative Method}
 \label{appendix:numerical:iterative}
@@ -145,4 +141,4 @@ This method implements a policy iteration algorithm, incrementally calculating $
 		\big{(} \Psi_{11} + \Psi_{12}\vb*{P}_{\gamma,k+1} \big{)}^{-1}\\
 \end{aligned}
 \end{equation}
-for $k = N, N-1, ... 1$.  Over an infinite horizon, $N \rightarrow \infty$ and  $\vb*{P}_{\gamma,k} \rightarrow \vb*{P}_{\gamma}$, and \eqref{eq:dgare_iterative_method} is no different from the DGARE provided by \eqref{eq-hinf-dgare}.  To solve it using policy iteration, the difference equation is initialized with $\vb*{P}_{\gamma,k} = \vb*{Q}_{x}$ at $k = N$ and iterated backward (verifying also the spectral radius condition \eqref{eq-hinf-existence} at each iteration) until the value of $\vb*{P}_{\gamma,k}$ converges.
+for $k = N, N-1, ... 1$.  Over an infinite horizon, $N \rightarrow \infty$ and  $\vb*{P}_{\gamma,k} \rightarrow \vb*{P}_{\gamma}$, and Equation \eqref{eq:dgare_iterative_method} is no different from the DGARE provided by Equation \eqref{eq-hinf-dgare}.  To solve it using policy iteration, the difference equation is initialized with $\vb*{P}_{\gamma,k} = \vb*{Q}_{x}$ at $k = N$ and iterated backward, verifying the spectral radius condition at each iteration using Equation \eqref{eq-hinf-existence}, until the value of $\vb*{P}_{\gamma,k}$ converges.
